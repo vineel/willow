@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bridge-channel": {
+      "command": "bun",
+      "args": ["run", "--silent", "./bridge-channel/server.ts", "8788"]
+    }
+  }
+}
