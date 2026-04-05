@@ -22,4 +22,9 @@ export const config = {
   claudeP: {
     timeoutMs: 120_000,
   },
+
+  ollama: {
+    baseUrl: "http://localhost:11434",
+    model: process.env.OLLAMA_MODEL ?? "qwen3:8b",
+  },
 } as const;
