@@ -378,6 +378,27 @@ Claude Code connects to the bridge via MCP during development and testing. The s
 
 ## Memory Model
 
+### Fact Source — the original input
+
+Every raw input (file, email, web page, conversation, CLI message) is recorded as a fact_source before extraction begins. Facts point back to their source with an ordinal preserving extraction order.
+
+```
+source_id         UUID
+source_type       text — file | email | web | conversation | cli | agent (open vocabulary)
+filename          text nullable — for files
+url               text nullable — for web pages
+original_id       text nullable — email Message-ID header, conversation session id, etc.
+title             text nullable — email subject, page title, filename
+summary           text nullable — short LLM-generated summary of the source content
+raw_text          text — full original content as fed to the extractor
+metadata          JSONB — source-type-specific fields
+                    email: {from, to, cc, date, thread_id}
+                    file: {directory, mime_type, size_bytes}
+                    web: {fetched_at, status_code}
+                    conversation: {participants, channel}
+created           timestamp
+```
+
 ### Fact — the atomic unit
 
 Every piece of information is a fact. Facts are the only primitive.
@@ -398,9 +419,10 @@ expires_date      timestamp nullable
 expiry_weight     float 0.0–1.0
 expiry_decay      float — weight reduction per day
 expiry_reeval_at  timestamp
-source_type       cli | email | web | file | agent
-source_id         reference to originating input
-provenance        {source, timestamp, confidence, human_verified}
+source_id         UUID FK → fact_source table
+source_ordinal    int — extraction sequence within source (1, 2, 3...)
+confidence        float 0.0–1.0
+human_verified    bool
 reprocess_count   int
 next_reprocess    timestamp
 ```
@@ -504,10 +526,12 @@ Two separate agents with separate prompts and code.
 **Output:** Candidate facts written to the fact queue
 
 Responsibilities:
+- Create a `fact_source` record for the raw input (with type, filename/url/original_id, raw text, metadata)
 - Pull discrete facts from raw input
 - Assign action tag: `remember`, `verify_world`, or `verify_human`
 - Extract named entities from each fact (people, places, orgs, events)
 - Generate naive qe_text from raw input alone
+- Write facts with `source_id` FK and `source_ordinal` (1, 2, 3... preserving extraction order)
 - Write to fact queue with status `pending`
 - Update global recency context with any mentioned factoid candidates
 
@@ -702,9 +726,10 @@ sdk/
 
 **Single Postgres instance** with pgvector extension.
 
-Core tables:
-- `facts` — all facts and factoids
-- `relationships` — typed edges between factoids
+Core tables (singular naming convention):
+- `fact_source` — original input documents (files, emails, web pages, conversations)
+- `fact` — all facts and factoids
+- `fact_relationship` — typed edges between factoids
 - `fact_queue` — durable processing queue
 - `recency_context` — global entity spotlight
 - `agent_registry` — agent specs
