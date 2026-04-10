@@ -18,7 +18,11 @@
     "mcp:interests": "bun run --silent mcp/interests-mcp/server.ts",
     "mcp:notify": "bun run --silent mcp/notify-mcp/server.ts",
     "mcp:web": "bun run --silent mcp/web-mcp/server.ts",
+    "mcp:pipeline": "bun run --silent mcp/pipeline-mcp/server.ts",
     "pib:fetch": "bun run pib/fetch.ts",
+    "pib:worker": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/worker.ts",
+    "pib:digest:preview": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/digest-preview.ts",
+    "pib:digest:send": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/digest-send.ts",
     "pib:migrate": "psql -d willow -f db/migrations/001-pib-tables.sql"
   },
   "dependencies": {
