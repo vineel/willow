@@ -7,11 +7,26 @@
     "bridge": "bun run bridge/server.ts",
     "channel": "bun run --silent bridge-channel/server.ts",
     "chat": "bun run stubs/chat-cli.ts",
-    "agent-test": "bun run stubs/agent-test.ts"
+    "agent-test": "bun run stubs/agent-test.ts",
+    "memory": "bun run memory/server.ts >> /tmp/memory.log 2>&1",
+    "memory:dev": "bun run --watch memory/server.ts",
+    "memory:clear": "bun run memory/scripts/clear.ts",
+    "memory:status": "NOTES_ROOT=${NOTES_ROOT:-/Users/vineel/Dropbox/VineelerNotes} bun run memory/scripts/status.ts",
+    "memory:retry": "NOTES_ROOT=${NOTES_ROOT:-/Users/vineel/Dropbox/VineelerNotes} bun run memory/scripts/retry.ts",
+    "mcp:memory": "bun run --silent mcp/memory-mcp/server.ts",
+    "mcp:triage": "bun run --silent mcp/triage-mcp/server.ts",
+    "mcp:interests": "bun run --silent mcp/interests-mcp/server.ts",
+    "mcp:notify": "bun run --silent mcp/notify-mcp/server.ts",
+    "mcp:web": "bun run --silent mcp/web-mcp/server.ts",
+    "pib:fetch": "bun run pib/fetch.ts",
+    "pib:migrate": "psql -d willow -f db/migrations/001-pib-tables.sql"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "chokidar": "^4.0.0",
     "fastify": "^5.3.3",
+    "graphile-worker": "^0.16.0",
+    "hono": "^4.7.0",
     "postgres": "^3.4.8"
   },
   "devDependencies": {
