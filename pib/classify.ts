@@ -1,7 +1,10 @@
 import { sql } from "./config";
 import { chatCompletion, healthCheck } from "../memory/lmstudio/client";
+import { createLogger } from "./logger";
 import type { CanonicalEvent } from "./jmap/types";
 import type { Interest } from "./interest-matcher";
+
+const log = createLogger("pib.classify");
 
 interface ClassificationResult {
   category: string;
@@ -85,7 +88,7 @@ Example: {"category": "subscription", "subcategory": "newsletter", "confidence":
   // Check if LM Studio is available
   const lmAvailable = await healthCheck();
   if (!lmAvailable) {
-    console.error("[classify] LM Studio not available, skipping classification");
+    log.warn("LM Studio not available, skipping classification");
     return {
       category: "unknown",
       subcategory: "unknown",
@@ -120,7 +123,7 @@ Example: {"category": "subscription", "subcategory": "newsletter", "confidence":
       model: "local",
     };
   } catch (err) {
-    console.error("[classify] LLM classification failed:", (err as Error).message);
+    log.error(`LLM classification failed: ${(err as Error).message}`);
     return {
       category: "unknown",
       subcategory: "unknown",

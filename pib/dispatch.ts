@@ -2,6 +2,9 @@ import { sql } from "./config";
 import type { CanonicalEvent } from "./jmap/types";
 import type { InterestMatch } from "./interest-matcher";
 import { executeAction, logExecution } from "./action";
+import { createLogger } from "./logger";
+
+const log = createLogger("pib.dispatch");
 
 interface DispatchResult {
   actionsExecuted: number;
@@ -30,13 +33,13 @@ export async function dispatch(
       continue;
     }
 
-    console.log(`  Executing action for interest "${interest.name}"...`);
+    log.info(`Executing action for interest="${interest.name}" prompt="${interest.action_prompt?.slice(0, 80)}..."`);
 
     const result = await executeAction(event, interest, extractedData);
 
     await logExecution(
       factId,
-      null, // no handler_id for interest-driven actions
+      null,
       result.success ? "success" : "failed",
       result.durationMs,
       result.error
@@ -49,9 +52,9 @@ export async function dispatch(
     });
 
     if (result.success) {
-      console.log(`    Done (${result.durationMs}ms)`);
+      log.info(`Action complete for "${interest.name}" duration=${result.durationMs}ms`);
     } else {
-      console.log(`    Failed: ${result.error}`);
+      log.error(`Action failed for "${interest.name}": ${result.error}`);
     }
   }
 

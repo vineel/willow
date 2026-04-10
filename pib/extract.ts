@@ -1,7 +1,10 @@
 import { sql } from "./config";
 import { chatCompletion, healthCheck } from "../memory/lmstudio/client";
+import { createLogger } from "./logger";
 import type { CanonicalEvent } from "./jmap/types";
 import type { Interest } from "./interest-matcher";
+
+const log = createLogger("pib.extract");
 
 interface ExtractionResult {
   data: Record<string, unknown>;
@@ -47,7 +50,7 @@ export async function extract(
 ): Promise<ExtractionResult> {
   const lmAvailable = await healthCheck();
   if (!lmAvailable) {
-    console.error("[extract] LM Studio not available, skipping extraction");
+    log.warn("LM Studio not available, skipping extraction");
     return { data: {}, model: "none" };
   }
 
@@ -108,7 +111,7 @@ Respond with JSON matching the schema above. Use null for fields not found in th
 
     return { data: parsed as Record<string, unknown>, model: "local" };
   } catch (err) {
-    console.error("[extract] LLM extraction failed:", (err as Error).message);
+    log.error(`LLM extraction failed: ${(err as Error).message}`);
     return { data: {}, model: "error" };
   }
 }

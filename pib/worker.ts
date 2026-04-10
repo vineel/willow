@@ -13,69 +13,61 @@ import { run, type TaskList, parseCronItems } from "graphile-worker";
 import { sql } from "./config";
 import { runPipeline } from "./pipeline";
 import { sendDigest } from "./digest";
+import { createLogger } from "./logger";
 
+const log = createLogger("pib.worker");
 const FOLDERS_TO_SYNC = ["inbox", "for-willow", "not-for-willow"];
 
 const tasks: TaskList = {
-  /** Full pipeline run for all watched folders */
-  async pib_ingest(_payload, helpers) {
-    helpers.logger.info("[pib_ingest] Starting pipeline run...");
+  async pib_ingest(_payload, _helpers) {
+    log.runStart(`Pipeline run: folders=[${FOLDERS_TO_SYNC.join(", ")}]`);
 
     for (const folder of FOLDERS_TO_SYNC) {
       try {
-        const stats = await runPipeline(folder);
-        helpers.logger.info(
-          `[pib_ingest] ${folder}: fetched=${stats.fetched} ingested=${stats.ingested} ` +
-          `skipped=${stats.skipped} classified=${stats.classified} dispatched=${stats.dispatched}` +
-          (stats.errors.length > 0 ? ` errors=${stats.errors.length}` : "")
-        );
+        await runPipeline(folder);
+        // runPipeline logs its own DONE summary line
       } catch (err) {
-        helpers.logger.error(`[pib_ingest] ${folder} failed: ${(err as Error).message}`);
+        log.error(`Folder "${folder}" failed: ${(err as Error).message}`);
       }
     }
-
-    helpers.logger.info("[pib_ingest] Pipeline run complete.");
   },
 
-  /** Daily digest — collect and send */
-  async pib_digest(_payload, helpers) {
-    helpers.logger.info("[pib_digest] Sending daily digest...");
+  async pib_digest(_payload, _helpers) {
+    log.runStart("Daily digest");
     try {
       const result = await sendDigest();
       if (result.sent) {
-        helpers.logger.info(`[pib_digest] Digest sent with ${result.count} items.`);
+        log.info(`Digest sent: ${result.count} items`);
       } else {
-        helpers.logger.info("[pib_digest] No pending digest items.");
+        log.info("No pending digest items");
       }
     } catch (err) {
-      helpers.logger.error(`[pib_digest] Failed: ${(err as Error).message}`);
+      log.error(`Digest failed: ${(err as Error).message}`);
     }
   },
 };
 
-// Cron schedules
 const crontab = parseCronItems([
   {
     task: "pib_ingest",
-    match: "*/15 * * * *", // every 15 minutes
+    match: "*/15 * * * *",
     identifier: "pib_ingest_cron",
   },
   {
     task: "pib_digest",
-    match: "0 8 * * *", // daily at 8:00 AM (server local time)
+    match: "0 8 * * *",
     identifier: "pib_digest_cron",
   },
 ]);
 
 async function main() {
-  console.log("[pib-worker] Starting PIB Worker...");
+  log.runStart("Worker starting");
 
-  // Verify DB
   try {
     await sql`SELECT 1`;
-    console.log("[pib-worker] Database connected");
+    log.info("Database connected");
   } catch (err) {
-    console.error("[pib-worker] Failed to connect to database:", err);
+    log.error(`Failed to connect to database: ${err}`);
     process.exit(1);
   }
 
@@ -87,11 +79,10 @@ async function main() {
     parsedCronItems: crontab,
   });
 
-  console.log("[pib-worker] Graphile Worker started");
-  console.log("[pib-worker] Cron: pib_ingest every 15 min, pib_digest daily at 8am");
+  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 8am daily");
 
   const shutdown = async () => {
-    console.log("\n[pib-worker] Shutting down...");
+    log.info("Shutting down...");
     await runner.stop();
     await sql.end();
     process.exit(0);
@@ -102,6 +93,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("[pib-worker] Fatal error:", err);
+  log.error(`Fatal: ${(err as Error).message}`);
   process.exit(1);
 });

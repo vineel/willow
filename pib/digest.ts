@@ -5,6 +5,9 @@
 import { sql, getSecret } from "./config";
 import { getSession, getMailboxes } from "./jmap/session";
 import { sendNotification } from "./jmap/notify";
+import { createLogger } from "./logger";
+
+const log = createLogger("pib.digest");
 
 interface DigestItem {
   factId: string;
@@ -144,8 +147,10 @@ export async function previewDigest(): Promise<{ text: string; count: number }> 
 export async function sendDigest(): Promise<{ sent: boolean; count: number }> {
   const items = await getPendingDigestItems();
   if (items.length === 0) {
+    log.info("No pending digest items");
     return { sent: false, count: 0 };
   }
+  log.info(`Composing digest with ${items.length} items across ${groupDigestItems(items).length} categories`);
 
   const groups = groupDigestItems(items);
   const bodyText = formatDigestText(groups, items.length);
@@ -175,5 +180,6 @@ export async function sendDigest(): Promise<{ sent: boolean; count: number }> {
     WHERE fact_id = ANY(${factIds})
   `;
 
+  log.info(`Digest sent: ${items.length} items, ${groupDigestItems(items).length} categories`);
   return { sent: true, count: items.length };
 }
