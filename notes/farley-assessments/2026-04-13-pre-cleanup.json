@@ -1,0 +1,237 @@
+{
+  "label": "2026-04-13-pre-cleanup",
+  "timestamp": "2026-04-13T15:43:41.142Z",
+  "totals": {
+    "facts_active": 1483,
+    "factoids_active": 620,
+    "factoids_human_verified": 0,
+    "relationships": 0,
+    "entity_addresses": 93
+  },
+  "factoid_type_distribution": {
+    "Person": 262,
+    "(null)": 233,
+    "Concept": 50,
+    "Organization": 41,
+    "Event": 22,
+    "Product": 11,
+    "Place": 1
+  },
+  "person_quality": {
+    "total": 262,
+    "junk_in_person": 59,
+    "junk_examples": [
+      {
+        "fact_id": "8690c707-3bbe-4c7b-b274-4124096b0cf9",
+        "title": "LinkedIn Background Check Login",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "e9edbd67-809f-4e0b-8552-7cc492ade06f",
+        "title": "Metrics, KPIs, and SLAs",
+        "pattern": "center|stadium|arena|theater|theatre|venue|restaurant|bar\\b|cafe"
+      },
+      {
+        "fact_id": "295ac731-b673-4dfe-90e5-6f7dd13d29db",
+        "title": "Interview Preparation Tips",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "5d60ba5f-f83b-45bc-83e7-87f17446791f",
+        "title": "Apple Call",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "c4c9dc33-2e30-4266-a2c9-01ad0a25fd09",
+        "title": "Prep Calls with Jer and Bryn",
+        "pattern": "center|stadium|arena|theater|theatre|venue|restaurant|bar\\b|cafe"
+      },
+      {
+        "fact_id": "5d6c9591-8f89-49da-8e6d-6b5a5cfecfbb",
+        "title": "Vineel's Dropbox account",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "a76aec68-db59-4aab-8eab-9d7c2231ff9e",
+        "title": "Vineel's email account",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "97242d45-6147-4f78-9ef0-3fcd6e6989d4",
+        "title": "Vineel's Amazon account",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "fbc67343-d359-4fb4-8f0a-69d54c150731",
+        "title": "Vineel's Netflix account",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "3a29b6e0-9d1b-4bb5-aff8-bbceb0bea26c",
+        "title": "AWS Vinapps.com EC2 setup",
+        "pattern": "tmux|kitty|vim|emacs|bash|zsh|shell"
+      },
+      {
+        "fact_id": "3ca64088-5a62-4ada-9216-1bc4bd30c603",
+        "title": "Elastic IP setup",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "9472f2c8-ed57-4942-9b6e-c71e1e7e8fa5",
+        "title": "Let's Encrypt SSL certificate setup",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "ed7cc303-2162-4970-934e-536f3dcb4414",
+        "title": "Nginx configuration",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "6e7690de-479e-4006-b269-15bb0b807137",
+        "title": "playbook for EBT alerts",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "178a381e-585e-446b-a1cf-98c9322612e1",
+        "title": "Canva Pro Account",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "62d61592-fc45-48d2-b130-6acfbc2cf18b",
+        "title": "PayPal Login",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "6fff2202-a528-4daa-bde5-13785e992ba5",
+        "title": "Vineel's new Ubuntu setup",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "6f6e31b6-af77-4e2f-b1f8-18358b849f09",
+        "title": "start tmux session",
+        "pattern": "tmux|kitty|vim|emacs|bash|zsh|shell"
+      },
+      {
+        "fact_id": "b3cad0cb-3993-4bc7-859c-c4d91ec605b5",
+        "title": "detach from tmux session",
+        "pattern": "tmux|kitty|vim|emacs|bash|zsh|shell"
+      },
+      {
+        "fact_id": "d7f25cd2-a56f-49d9-a451-a667a7353200",
+        "title": "attach to most recent tmux session",
+        "pattern": "tmux|kitty|vim|emacs|bash|zsh|shell"
+      }
+    ],
+    "short_content_lt_20": 5,
+    "no_address_and_short": 5,
+    "orphan_no_children": 205
+  },
+  "duplication": {
+    "exact_title_duplicate_groups": 23,
+    "exact_title_duplicate_factoids": 66,
+    "worst_offenders": [
+      {
+        "title": "prudential center",
+        "factoid_type": "Person",
+        "count": 7
+      },
+      {
+        "title": "nvidia",
+        "factoid_type": "Person",
+        "count": 5
+      },
+      {
+        "title": "fidelity investments",
+        "factoid_type": "Organization",
+        "count": 4
+      },
+      {
+        "title": "brave search api",
+        "factoid_type": "Person",
+        "count": 4
+      },
+      {
+        "title": "linkedin",
+        "factoid_type": "Organization",
+        "count": 4
+      },
+      {
+        "title": "maplewood recreation department",
+        "factoid_type": "Person",
+        "count": 3
+      },
+      {
+        "title": "michael spencer from ai supremacy",
+        "factoid_type": "Person",
+        "count": 3
+      },
+      {
+        "title": "amazon's hiring process",
+        "factoid_type": null,
+        "count": 3
+      },
+      {
+        "title": "openclaw (aka... on facebook",
+        "factoid_type": "Person",
+        "count": 3
+      },
+      {
+        "title": "peter yang",
+        "factoid_type": "Person",
+        "count": 3
+      },
+      {
+        "title": "amazon.com",
+        "factoid_type": "Organization",
+        "count": 3
+      },
+      {
+        "title": "venmo",
+        "factoid_type": "Person",
+        "count": 2
+      },
+      {
+        "title": "eric swalwell",
+        "factoid_type": "Person",
+        "count": 2
+      },
+      {
+        "title": "amazon interview",
+        "factoid_type": null,
+        "count": 2
+      },
+      {
+        "title": "scott galloway",
+        "factoid_type": "Person",
+        "count": 2
+      }
+    ]
+  },
+  "fragmentation": {
+    "possessive_prefix_clusters": 3,
+    "orphaned_fragment_facts": 0,
+    "worst_prefixes": [
+      {
+        "prefix": "vineel",
+        "fragments": 12,
+        "parent_exists": true
+      },
+      {
+        "prefix": "brad",
+        "fragments": 3,
+        "parent_exists": true
+      },
+      {
+        "prefix": "amazon",
+        "fragments": 3,
+        "parent_exists": true
+      }
+    ]
+  },
+  "address_graph": {
+    "factoids_with_addresses": 93,
+    "addresses_per_factoid_avg": 1,
+    "display_name_collisions": 9
+  },
+  "merges_recorded": 0
+}
