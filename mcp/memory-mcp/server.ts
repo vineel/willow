@@ -32,7 +32,7 @@ const server = new McpServer({
     "Use memory_search to look up facts before answering questions about people, events, or personal context.",
     "Use memory_add to store new facts you learn during conversation that the user would want remembered.",
     "When adding facts, be specific and atomic — one distinct piece of information per fact.",
-    "Set is_factoid=true and factoid_type for root entities (people, places, organizations).",
+    "Set is_factoid=true and factoid_type for root entities. Use Person ONLY for actual humans. Use Organization for companies/newsletters/venues-run-as-orgs, Place for physical locations, Account for logins/credentials grouped per service, Unknown when you can't tell yet (prefer this over guessing Person).",
     "Always search before adding to avoid duplicates.",
     "If memory_search doesn't return the right results, try memory_search_keywords to search by extracted keyword tags instead.",
   ].join(" "),
@@ -79,9 +79,12 @@ const FactSchema = z.object({
   keywords: z.array(z.string()).optional().describe("Keywords for search (e.g. names, topics)"),
   qe_text: z.string().optional().describe("Alternate phrasings/synonyms to improve search recall"),
   confidence: z.number().min(0).max(1).optional().describe("How confident you are (0-1, default 0.8)"),
-  is_factoid: z.boolean().optional().describe("True if this is a root entity (person, place, org)"),
-  factoid_type: z.enum(["Person", "Place", "Organization", "Event", "Concept", "Product"]).optional()
-    .describe("Entity type — only set when is_factoid is true"),
+  is_factoid: z.boolean().optional().describe("True if this is a root entity (person, place, org, account, etc.)"),
+  factoid_type: z.enum([
+    "Person", "Place", "Organization", "Event", "Concept", "Product",
+    "Account", "Unknown",
+  ]).optional()
+    .describe("Entity type. Person=human only. Account=login/credentials for a service. Unknown=unresolved sender, to be promoted later. Only set when is_factoid is true."),
   expires_type: z.enum(["never", "weighted", "date"]).optional().describe("Expiry strategy (default: never)"),
   action: z.enum(["remember", "verify_world", "verify_human"]).optional()
     .describe("Pipeline action: remember (store), verify_world (fact-check), verify_human (ask user)"),

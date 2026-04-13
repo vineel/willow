@@ -101,7 +101,8 @@ async function updateRecency(factoidId: string): Promise<void> {
 function inferEntityType(address: string): string {
   const lower = address.toLowerCase();
 
-  // Common patterns for services/automated senders
+  // Automated/transactional sender patterns are definitely Organizations,
+  // not people — no human is named "noreply".
   if (
     lower.includes("noreply") ||
     lower.includes("no-reply") ||
@@ -110,21 +111,24 @@ function inferEntityType(address: string): string {
     lower.includes("mailer-daemon") ||
     lower.includes("postmaster")
   ) {
-    return "Service";
+    return "Organization";
   }
 
-  // Known service domains (extend as needed)
+  // Known organization domains (small allowlist; not a serious classifier).
   const domain = lower.split("@")[1] ?? "";
-  const serviceDomains = [
+  const orgDomains = [
     "amazon.com", "google.com", "apple.com", "microsoft.com",
     "facebook.com", "twitter.com", "linkedin.com", "github.com",
     "netflix.com", "spotify.com", "uber.com", "lyft.com",
     "fidelity.com", "schwab.com", "vanguard.com",
   ];
-  if (serviceDomains.some((d) => domain.endsWith(d))) {
+  if (orgDomains.some((d) => domain.endsWith(d))) {
     return "Organization";
   }
 
-  // Default to Person
-  return "Person";
+  // Default to Unknown. Historically this defaulted to Person, which polluted
+  // the Person factoid bucket with every unseen newsletter/venue/org sender.
+  // Unknown factoids can be promoted to Person/Organization/Account later
+  // by the cleanup sweep or LLM maintenance pass.
+  return "Unknown";
 }

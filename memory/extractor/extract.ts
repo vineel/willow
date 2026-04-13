@@ -217,7 +217,10 @@ function validateAction(val: unknown): "remember" | "verify_world" | "verify_hum
 }
 
 function validateFactoidType(val: unknown): string | null {
-  const valid = ["Person", "Place", "Organization", "Event", "Concept", "Product"];
+  const valid = [
+    "Person", "Place", "Organization", "Event", "Concept", "Product",
+    "Account", "Unknown",
+  ];
   if (typeof val === "string" && valid.includes(val)) return val;
   return null;
 }

@@ -65,7 +65,8 @@ CREATE TABLE app.fact (
                     -- NULL for unclustered facts (fresh from extractor) and top-level factoids
                     -- can point to a factoid that itself has a parent (multi-level clustering)
   factoid_type      text,
-                    -- Person, Place, Organization, Event, Concept, Product
+                    -- Person, Place, Organization, Event, Concept, Product,
+                    -- Account, Unknown
                     -- only set when is_factoid = true
 
   -- Query expansion

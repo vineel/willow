@@ -24,7 +24,10 @@ interface AddFactsRequest {
   source?: AddFactInput["source"];  // shared source for all facts in batch
 }
 
-const VALID_FACTOID_TYPES = ["Person", "Place", "Organization", "Event", "Concept", "Product"];
+const VALID_FACTOID_TYPES = [
+  "Person", "Place", "Organization", "Event", "Concept", "Product",
+  "Account", "Unknown",
+];
 const VALID_EXPIRES_TYPES = ["never", "weighted", "date"];
 const VALID_ACTIONS = ["remember", "verify_world", "verify_human"];
 
