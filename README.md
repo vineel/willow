@@ -105,6 +105,9 @@ Then talk to it naturally:
 | `bun run pib:fetch -- --folder inbox --limit 10 --dispatch` | Interactive CLI: + action execution |
 | `bun run pib:digest:preview` | Preview what the next digest would contain |
 | `bun run pib:digest:send` | Send the digest immediately |
+| `bun run pib:digest:list` | List last 10 digested emails (use `-- --limit N` for more) |
+| `bun run pib:digest:test -- --last 10` | Send a test digest with the last N items |
+| `bun run pib:digest:test -- <id> ...` | Send a test digest for specific fact IDs |
 | `bun run pib:migrate` | Run the PIB database migration |
 
 ### Memory
@@ -129,6 +132,40 @@ These run as stdio processes, started automatically by Claude Code via `.mcp.jso
 | `willow-notify` | `send_notification`, `send_email` |
 | `willow-web` | `web_search`, `web_fetch` |
 | `willow-pipeline` | `pipeline_status`, `run_now`, `digest_preview`, `send_digest` |
+
+## LaunchAgents (auto-start & auto-restart)
+
+Both the pipeline worker and memory server run as macOS LaunchAgents — they auto-start on login and auto-restart on crash.
+
+| Service | Label | Plist | Log |
+|---------|-------|-------|-----|
+| Pipeline worker | `com.vineel.willow-worker` | `~/Library/LaunchAgents/com.vineel.willow-worker.plist` | `/tmp/willow-worker.log` |
+| Memory server | `com.vineel.willow-memory` | `~/Library/LaunchAgents/com.vineel.willow-memory.plist` | `/tmp/willow-memory.log` |
+
+```bash
+# Check if services are running
+launchctl list | grep willow
+
+# Stop/start a service
+launchctl stop com.vineel.willow-worker
+launchctl start com.vineel.willow-worker
+launchctl stop com.vineel.willow-memory
+launchctl start com.vineel.willow-memory
+
+# Disable (unload) / re-enable (load)
+launchctl unload ~/Library/LaunchAgents/com.vineel.willow-worker.plist
+launchctl load ~/Library/LaunchAgents/com.vineel.willow-worker.plist
+launchctl unload ~/Library/LaunchAgents/com.vineel.willow-memory.plist
+launchctl load ~/Library/LaunchAgents/com.vineel.willow-memory.plist
+
+# View logs
+tail -f /tmp/willow-worker.log
+tail -f /tmp/willow-memory.log
+
+# Check which code revision is running
+cat /tmp/willow-worker-version.json
+cat /tmp/willow-memory-version.json
+```
 
 ## How the email pipeline works
 
