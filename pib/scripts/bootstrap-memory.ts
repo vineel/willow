@@ -181,24 +181,48 @@ const HAIKU_MODEL = "claude-haiku-4-5-20251001";
 
 const PREFILTER_SYSTEM = `You are a pre-filter for Vineel Shah's personal memory bootstrap.
 
+Vineel's circle is his wife Stephanie, his kids Zeph and Ele, his parents
+Vinod and Neela, his brother Nigam and family, the Sokaris in-laws, and
+his Accordli co-founder Brad Simon. His ongoing projects are Accordli (AI
+contracting workbench for lawyers) and Willow (this memory system). He
+does not currently hold a day job.
+
 You will be shown one email. Decide whether it contains durable personal
-facts about Vineel, his family, his ongoing projects, or people and
-organizations in his circle that are worth remembering a year from now.
+facts about Vineel, his immediate circle, his ongoing projects, or
+active professional relationships that will still matter in a year.
 
 Say YES when the email contains things like:
-- a person's contact info, role, relationship, or meaningful biographical context
-- a decision, commitment, or plan Vineel has made
-- a recurring event, appointment, or schedule item
-- project context — Accordli, Willow, side projects
-- medical, financial, or legal context worth tracking
+- a specific person in Vineel's circle sharing contact info, a decision,
+  a medical/financial/legal update, or a concrete plan
+- a confirmed event Vineel or a family member RSVP'd to or committed to
+- Accordli / Willow project context from Brad or other collaborators
+- a received payment, invoice, or financial commitment for a real
+  engagement Vineel is actually doing work for
+- school / college / medical communications about Zeph, Ele, or his
+  parents (Vinod, Neela)
 
-Say NO for transactional, automated, or purely ephemeral content:
-- order confirmations, shipping notifications, receipts
-- newsletters, marketing, promotions
-- 2FA codes, verification emails
-- social network notifications
-- calendar invitations that repeat identical info
-- no-reply automated alerts that aren't novel
+Say NO — the following NEVER qualify even when they sound important:
+
+- Cold-outreach investment pitches, "family office interest", inbound
+  sales DMs from unknown senders. Scammy domains ("trustedstockdesk.help",
+  "*.xyz", look-alike fintech brands) are ALWAYS NO even when the subject
+  name-drops Vineel. Treat these as spam.
+- Marketing newsletters and substacks — including ones where the AUTHOR
+  shares their own travel, visa status, life update, or meetup plans.
+  Vineel is not personally close to these authors; their life is not
+  his memory. NO regardless of how warm the email sounds.
+- Automated event invitations (tech meetups, vendor breakfasts, webinars,
+  conferences) that Vineel has NOT explicitly accepted. A calendar invite
+  in the body is not evidence of attendance.
+- Emails from Willow itself — anything whose sender is
+  "willow-notification@vineel.com" or whose subject starts with "Willow:".
+  These are derivative summaries OF memory, not new input. NEVER YES.
+- Daily digests, roundups, "here's what's new" style automated summaries.
+- Order confirmations, shipping notifications, receipts for e-commerce
+  purchases, 2FA codes, verification links, social network notifications.
+
+Bias toward NO. A borderline email should be NO — the extraction stage
+is expensive and false positives are more costly than false negatives.
 
 Respond with JSON only:
 {"worth": true|false, "reason": "<one short sentence>"}`;
@@ -359,6 +383,23 @@ async function main() {
 
       for (const email of emails) {
         const event = normalize(email);
+
+        // Hard skip Willow's own notification emails — derivative of
+        // memory, not input to it. Belt-and-suspenders alongside the
+        // prompt rule, since the prompt isn't load-bearing for things
+        // we can match mechanically.
+        const fromAddr = event.fromEntity.address.toLowerCase();
+        if (
+          fromAddr === "willow-notification@vineel.com" ||
+          (email.subject ?? "").startsWith("Willow:")
+        ) {
+          triaged++;
+          if (args.verbose) {
+            console.log(`  SKIP   ${email.subject?.slice(0, 60) ?? ""}  (willow self)`);
+          }
+          continue;
+        }
+
         const verdict = triage(event, rules);
         triaged++;
         if (verdict.action === "noise") {
