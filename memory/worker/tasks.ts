@@ -9,6 +9,24 @@ import { sql } from "../db";
 
 const COULD_NOT_INGEST_PATH = join(import.meta.dir, "..", "could-not-ingest.txt");
 
+// Dropbox FileProvider can block open(2) indefinitely while trying to
+// materialize online-only files or while the extension is wedged. Bound the
+// read so graphile-worker can retry on a fresh process instead of hanging for
+// ~30 minutes per file (as observed in /tmp/willow-memory.log).
+const FILE_READ_TIMEOUT_MS = 30_000;
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Timeout after ${ms}ms: ${label}`));
+    }, ms);
+    p.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); },
+    );
+  });
+}
+
 function shortPath(filePath: string): string {
   // Trim common prefix for readable logs
   return filePath.replace(/^\/Users\/vineel\/Dropbox\/VineelerNotes\//, "");
@@ -19,12 +37,21 @@ const ingestNote: Task = async (payload, helpers) => {
   const short = shortPath(filePath);
 
   const file = Bun.file(filePath);
-  if (!(await file.exists())) {
+  const exists = await withTimeout(
+    file.exists(),
+    FILE_READ_TIMEOUT_MS,
+    `exists(${short})`,
+  );
+  if (!exists) {
     console.log(`[ingest] SKIP ${short} — file not found`);
     return;
   }
 
-  const rawText = await file.text();
+  const rawText = await withTimeout(
+    file.text(),
+    FILE_READ_TIMEOUT_MS,
+    `read(${short})`,
+  );
   if (rawText.trim().length === 0) {
     console.log(`[ingest] SKIP ${short} — empty file`);
     return;

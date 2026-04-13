@@ -4,6 +4,63 @@ import type { WorkerUtils } from "graphile-worker";
 
 const POLL_INTERVAL_MS = 60_000;
 
+// Dropbox FileProvider on macOS can return EINTR from opendir/open/stat when
+// the extension is busy (sync, materializing online-only files, wake-up).
+// Bun does not auto-retry EINTR, so we wrap filesystem calls ourselves.
+function isEINTR(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const code = (err as { code?: unknown }).code;
+  if (code === "EINTR") return true;
+  return err.message.includes("EINTR");
+}
+
+async function enumerateMarkdownFiles(
+  notesRoot: string,
+  logPrefix: string,
+): Promise<string[]> {
+  const MAX_RETRIES = 5;
+  const BACKOFF_MS = 200;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const glob = new Glob("**/*.md");
+      const paths: string[] = [];
+      for await (const relPath of glob.scan({ cwd: notesRoot })) {
+        paths.push(`${notesRoot}/${relPath}`);
+      }
+      return paths;
+    } catch (err) {
+      if (isEINTR(err) && attempt < MAX_RETRIES) {
+        const wait = BACKOFF_MS * attempt;
+        console.log(
+          `${logPrefix} glob.scan EINTR (attempt ${attempt}/${MAX_RETRIES}), retrying in ${wait}ms`,
+        );
+        await Bun.sleep(wait);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error(`${logPrefix} glob.scan: exhausted retries`);
+}
+
+async function statWithRetry(fullPath: string): Promise<{ mtime: number }> {
+  const MAX_RETRIES = 3;
+  const BACKOFF_MS = 100;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const stat = await Bun.file(fullPath).stat();
+      return { mtime: stat.mtime.getTime() };
+    } catch (err) {
+      if (isEINTR(err) && attempt < MAX_RETRIES) {
+        await Bun.sleep(BACKOFF_MS * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error("statWithRetry: unreachable");
+}
+
 interface FileState {
   mtime: number;
 }
@@ -16,18 +73,30 @@ export function startWatcher(notesRoot: string, workerUtils: WorkerUtils) {
     const now = new Date();
     const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
-    const glob = new Glob("**/*.md");
     const currentFiles = new Map<string, FileState>();
 
     let added = 0;
     let changed = 0;
     let removed = 0;
 
-    for await (const relPath of glob.scan({ cwd: notesRoot })) {
-      const fullPath = `${notesRoot}/${relPath}`;
-      const file = Bun.file(fullPath);
-      const stat = await file.stat();
-      const mtime = stat.mtime.getTime();
+    let paths: string[];
+    try {
+      paths = await enumerateMarkdownFiles(notesRoot, "[watcher]");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[watcher] Skipping poll — enumeration failed: ${msg}`);
+      return;
+    }
+
+    for (const fullPath of paths) {
+      let mtime: number;
+      try {
+        ({ mtime } = await statWithRetry(fullPath));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.log(`[watcher] stat failed for ${fullPath}: ${msg} — skipping`);
+        continue;
+      }
       currentFiles.set(fullPath, { mtime });
 
       const prev = knownFiles.get(fullPath);
@@ -116,18 +185,68 @@ async function deactivateNote(filePath: string) {
 export async function reconciliationScan(notesRoot: string, workerUtils: WorkerUtils) {
   console.log(`[reconciliation] Scanning ${notesRoot} for missed files...`);
 
-  const glob = new Glob("**/*.md");
   const filesOnDisk = new Map<string, number>(); // fullPath -> mtime
 
-  // 1. Scan disk in one pass — collect all paths and mtimes
-  for await (const relPath of glob.scan({ cwd: notesRoot })) {
-    const fullPath = `${notesRoot}/${relPath}`;
-    const file = Bun.file(fullPath);
-    const stat = await file.stat();
-    filesOnDisk.set(fullPath, stat.mtime.getTime());
+  // 1a. Enumerate paths (with EINTR retry — Dropbox FileProvider can return
+  //     EINTR on opendir; Bun does not auto-retry).
+  const scanStart = Date.now();
+  let paths: string[];
+  try {
+    paths = await enumerateMarkdownFiles(notesRoot, "[reconciliation]");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(
+      `[reconciliation] Enumeration failed after retries — skipping reconciliation this startup: ${msg}`,
+    );
+    return;
+  }
+  console.log(
+    `[reconciliation] Enumerated ${paths.length} paths in ${Date.now() - scanStart}ms`,
+  );
+
+  // 1b. Stat files with bounded concurrency + per-file slow-stat logging +
+  //     EINTR retry. Sequential awaited stats on Dropbox can stall per file
+  //     when the extension is busy; parallelizing bounds worst-case wall time
+  //     to O(ceil(n/concurrency) * slowest).
+  const CONCURRENCY = 16;
+  const SLOW_STAT_MS = 500;
+  const PROGRESS_EVERY = 25;
+  let done = 0;
+  let slowCount = 0;
+  let statFailures = 0;
+  const statStart = Date.now();
+
+  async function statOne(fullPath: string) {
+    const t0 = Date.now();
+    try {
+      const { mtime } = await statWithRetry(fullPath);
+      const elapsed = Date.now() - t0;
+      if (elapsed > SLOW_STAT_MS) {
+        slowCount++;
+        console.log(`[reconciliation] Slow stat (${elapsed}ms): ${fullPath}`);
+      }
+      filesOnDisk.set(fullPath, mtime);
+    } catch (err) {
+      statFailures++;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.log(`[reconciliation] Stat failed: ${fullPath} — ${msg}`);
+    }
+    done++;
+    if (done % PROGRESS_EVERY === 0) {
+      console.log(
+        `[reconciliation] Progress: ${done}/${paths.length} (${Date.now() - statStart}ms elapsed, ${slowCount} slow, ${statFailures} failed)`,
+      );
+    }
   }
 
-  console.log(`[reconciliation] Found ${filesOnDisk.size} files on disk`);
+  for (let i = 0; i < paths.length; i += CONCURRENCY) {
+    const batch = paths.slice(i, i + CONCURRENCY);
+    await Promise.all(batch.map(statOne));
+  }
+
+  console.log(
+    `[reconciliation] Found ${filesOnDisk.size} files on disk (stat phase: ${Date.now() - statStart}ms, ${slowCount} slow, ${statFailures} failed)`,
+  );
 
   // 2. Single batch query — get all known source_notes under this root
   const dbRows = await sql`
