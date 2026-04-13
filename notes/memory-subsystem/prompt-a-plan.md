@@ -71,4 +71,48 @@ We must achieve clarity. Ask me questions.
     
     Vineel: Just the memory subsystem. I want to build it, and set it populating. This will take a long time given my local model, so I want to get that going. I will build out other components after it is up and running.
 
-    
+----------------
+------------------
+1. i'm not convinced that is_root is the right name. Even root facts may have parent facts -- clustering isn't necessarily a 1 level structure. Maybe just is_factoid? Do you have a better name? Whatever we choose needs to be refactored across the schema.
+2. table app.fact_queue -- is this going to be controlled by Graphile, or by app code? Does Graphile have its own tables?
+3. when does processor run? who triggers it?
+----------
+1. is_factoid wins
+2. Option 2 wins
+
+go ahead and update.
+----------
+1. ah, i see. how about we use mistral to anonymize sensitive information, which can then be sent to sonnet? it shouldn't chagne sonnet's effectiveness.
+2. yeah i get it. ok, instead of nuke-and-replace, we should do an update. but how will that work?
+3. i think it needs a limited lookup -- stateless is not a design goal
+4. can you explain this problem a bit more?
+
+----------
+
+Let's use LLM matching for now. We can optimize for speed later if we want to.
+
+I think factoid_id is misnamed. It's supposed to be a reference to a parent_factoid_id, which would only be set by the processor, which works on previously created facts.
+----------
+
+I've been thinking about this.
+
+So I think we should modify the ingest->extraction path.
+
+1. we try it the "normal" way
+2. if that fails, we do a local LLM pass that checks to see if the note has "sensitive" information. If it does, we decide not to ingest that file, and put the filename into "could-not-ingest.txt"
+3. If it does NOT have sensitive information, we call the claude api and use haiku to do the extraction using the ANTRO_API_KEY environment variable for auth.
+
+Sensitive information might have:
+* social security number
+* credit card number
+* account login for a bank or other financial institution.
+
+Our financial institutions are:
+* Bank of America
+* Chase
+* Etrade
+* Schwab
+* Fidelity
+* Apple
+* Merrill
+* Merrill Lynch
