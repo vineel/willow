@@ -35,7 +35,9 @@
     "pib:digest:list": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/digest-list.ts",
     "pib:digest:test": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/digest-test.ts",
     "pib:search": "bun run pib/scripts/email-search.ts",
-    "pib:migrate": "psql -d willow -f db/migrations/001-pib-tables.sql"
+    "pib:migrate": "psql -d willow -f db/migrations/001-pib-tables.sql",
+    "pib:bootstrap-memory": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/bootstrap-memory.ts",
+    "pib:bootstrap-migrate": "psql -d willow -f db/migrations/004-bootstrap-runs.sql"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
