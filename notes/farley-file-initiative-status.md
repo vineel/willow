@@ -98,7 +98,14 @@ Each: dry-run default, prints proposed changes, `--apply` writes inside a transa
   - `memory/extractor/extract.ts::saveExtraction` — before inserting a fact with `is_factoid=true`, looks up exact-title + same-type match. If found, demotes the new row to `is_factoid=false` and sets `parent_factoid_id` so it becomes a child. Logs dedupe decisions.
   - Conservative on purpose: exact title only. Broader (trigram, embedding, semantic) dedupe runs in the periodic maintenance worker so a single extractor mistake can't silently merge genuinely-different entities.
 - **LLM type-assignment sweep ⏳ TODO** — 207 factoids currently have `factoid_type=NULL` (unchanged by the rule-based cleanup). Write `memory/scripts/assign-factoid-types.ts` that runs Haiku over each null-type factoid with its title + content + keywords and asks for a type + short rationale. Auto-apply types returned with confidence ≥ 0.85; park the rest for review. This is the biggest remaining reduction target for the Farley File goal.
-- **Bootstrap resume ⏳ TODO** — resume `notes/bootstrap-memory-plan.md` — historical 2000-email backfill. Blocked on: type-assignment sweep landing so the bootstrap isn't pouring more null-typed rows into the DB at scale.
+- **Bootstrap ✅ DONE** (2026-04-13) — `pib/scripts/bootstrap-memory.ts` built in two stages (scaffold + prefilter first, then Sonnet extraction + thin memory write), both committed. Full 2000-email run executed:
+  - 2000 → 1550 survived triage → 69 prefilter yes (3%)
+  - 69 Sonnet extraction calls → 115 facts written, 43 skipped as semantic duplicates
+  - Actual cost: $3.76 ($2.79 prefilter + $0.97 extraction) — inside the $3-6 envelope from the plan
+  - Wall time: ~38 min
+  - Real discoveries: Ashanti Rimes (Zeph's Grade 8 ELA teacher), Penny Petchers (Child Study Team Psy.D.), John Carroll / Rogers Behavioral Health / Project O summer camp organizations, detailed Ele OCD/school-avoidance context, Accordli technical history including the OpenXML .NET origins.
+  - Facts are date-contextualized per the prompt ("As of April 2026", "On April 8, 2026").
+- **LLM type-assignment sweep ✅ DONE** (earlier today, committed `f516c94`).
 
 ## Decisions locked in (2026-04-13)
 
