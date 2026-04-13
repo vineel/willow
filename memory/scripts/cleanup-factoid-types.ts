@@ -54,6 +54,18 @@ const RULES: Rule[] = [
       ),
   },
   {
+    name: "Playbook/command — command-object phrasing",
+    action: { kind: "demote" },
+    // Catches forms the strict line-start rule misses, like
+    // "detach from tmux session", "enable mouse mode in tmux",
+    // "kill tmux window", "create new kitty tab".
+    test: (title) =>
+      /\b(tmux|kitty|vim|emacs|neovim)\s+(session|window|pane|mode|buffer|tab|keybinding|command)s?\b/i.test(
+        title,
+      ) ||
+      /\b(in|from|to|into|within)\s+(tmux|kitty|vim|emacs|neovim)\b/i.test(title),
+  },
+  {
     name: "Playbook/command — how-to/setup/cheatsheet phrasing",
     action: { kind: "demote" },
     test: (title) =>

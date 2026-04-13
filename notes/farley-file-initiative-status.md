@@ -90,11 +90,15 @@ Each: dry-run default, prints proposed changes, `--apply` writes inside a transa
 - Results reviewed ✅ (see Phase 3 Results table above)
 - `notes/factoid-cleanup-retro.md` written ✅ — calibration notes, LLM judge verdict distribution, false-positive risks, maintenance-worker plan.
 
-### Phase 5 — Seed + unblock bootstrap ⏳ PENDING
+### Phase 5 — Seed + guardrails + bootstrap ⏳ IN PROGRESS
 
-- `scripts/seed-farley-from-claude-md.ts` — hand-author factoid seed from `~/willow-runtime-workspace/CLAUDE.md`: Vineel's family + Brad Simon + Accordli + Willow. `human_verified=true`. Gives the cleaned DB a trusted spine.
-- Add cross-pipeline dedupe-on-insert to `pib/entity-resolver.ts` and `memory/extractor/extract.ts` (strategy doc § 7).
-- Resume `notes/bootstrap-memory-plan.md` — historical 2000-email backfill.
+- **Seed ✅** (2026-04-13) — `memory/scripts/seed-farley-from-claude-md.ts` applied. 20 human_verified=true factoids mirroring `~/willow-runtime-workspace/CLAUDE.md`. 16 inserts + 4 updates that adopted the Vineel / Neela / Brad Unknown parents from reparent plus an existing Stephanie Sokaris row. Children already attached stay attached (same fact_id).
+- **On-insert dedupe hooks ✅** (2026-04-13) — both writer paths now check for exact-title / display-name collisions before minting new factoids:
+  - `pib/entity-resolver.ts::resolveAddress` — before creating, checks Block D (shared entity_address display_name) and Block A-lite (exact lowercased title) and links the new address to the existing factoid if either matches.
+  - `memory/extractor/extract.ts::saveExtraction` — before inserting a fact with `is_factoid=true`, looks up exact-title + same-type match. If found, demotes the new row to `is_factoid=false` and sets `parent_factoid_id` so it becomes a child. Logs dedupe decisions.
+  - Conservative on purpose: exact title only. Broader (trigram, embedding, semantic) dedupe runs in the periodic maintenance worker so a single extractor mistake can't silently merge genuinely-different entities.
+- **LLM type-assignment sweep ⏳ TODO** — 207 factoids currently have `factoid_type=NULL` (unchanged by the rule-based cleanup). Write `memory/scripts/assign-factoid-types.ts` that runs Haiku over each null-type factoid with its title + content + keywords and asks for a type + short rationale. Auto-apply types returned with confidence ≥ 0.85; park the rest for review. This is the biggest remaining reduction target for the Farley File goal.
+- **Bootstrap resume ⏳ TODO** — resume `notes/bootstrap-memory-plan.md` — historical 2000-email backfill. Blocked on: type-assignment sweep landing so the bootstrap isn't pouring more null-typed rows into the DB at scale.
 
 ## Decisions locked in (2026-04-13)
 

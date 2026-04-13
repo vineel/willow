@@ -24,6 +24,36 @@ export async function resolveAddress(
     return { factoidId: existing[0].factoid_id, isNew: false };
   }
 
+  // 1a. On-insert dedupe — see notes/person-dedupe-strategy.md §7.
+  //     Before minting a new factoid, look for an existing active factoid
+  //     that matches by either (a) shared entity_address display_name or
+  //     (b) exact lowercased title. If found, link the new address to it.
+  const normDisplay = displayName.toLowerCase().trim();
+  if (normDisplay.length > 0) {
+    const byDisplayName = await sql`
+      SELECT DISTINCT ea.factoid_id
+      FROM app.entity_address ea
+      JOIN app.fact f ON f.fact_id = ea.factoid_id
+      WHERE f.is_active = true AND f.is_factoid = true
+        AND lower(btrim(ea.display_name)) = ${normDisplay}
+      LIMIT 1
+    `;
+    if (byDisplayName.length > 0) {
+      await linkAddress(byDisplayName[0].factoid_id, sourceType, address, displayName);
+      return { factoidId: byDisplayName[0].factoid_id, isNew: false };
+    }
+    const byTitle = await sql`
+      SELECT fact_id FROM app.fact
+      WHERE is_active = true AND is_factoid = true
+        AND lower(btrim(title)) = ${normDisplay}
+      LIMIT 1
+    `;
+    if (byTitle.length > 0) {
+      await linkAddress(byTitle[0].fact_id, sourceType, address, displayName);
+      return { factoidId: byTitle[0].fact_id, isNew: false };
+    }
+  }
+
   // 2. Create new factoid + address in a transaction
   const factoidType = inferEntityType(address);
   const title = displayName !== address ? displayName : address;
@@ -84,6 +114,19 @@ export async function resolveEventSender(
   await updateRecency(resolved.factoidId);
 
   return resolved;
+}
+
+async function linkAddress(
+  factoidId: string,
+  sourceType: string,
+  address: string,
+  displayName: string,
+): Promise<void> {
+  await sql`
+    INSERT INTO app.entity_address (factoid_id, source_type, address, display_name)
+    VALUES (${factoidId}, ${sourceType}, ${address.toLowerCase()}, ${displayName})
+    ON CONFLICT (source_type, address) DO NOTHING
+  `;
 }
 
 async function updateRecency(factoidId: string): Promise<void> {

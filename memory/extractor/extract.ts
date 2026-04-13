@@ -145,16 +145,45 @@ export async function saveExtraction(
   // Insert facts and queue entries
   for (let i = 0; i < facts.length; i++) {
     const fact = facts[i];
+
+    // On-insert dedupe — see notes/person-dedupe-strategy.md §7.
+    // If the extractor says this is a factoid and there is already an
+    // active factoid with the same type and exact title, store the new
+    // fact as a CHILD of the existing factoid instead of minting a
+    // duplicate top-level row. Conservative: only exact lowercased title
+    // match. Broader semantic / trigram matching happens in the periodic
+    // maintenance worker.
+    let is_factoid = fact.is_factoid;
+    let factoid_type: string | null = fact.factoid_type;
+    let parent_factoid_id: string | null = null;
+    if (fact.is_factoid && fact.factoid_type) {
+      const [existingFactoid] = await sql`
+        SELECT fact_id FROM app.fact
+        WHERE is_active = true AND is_factoid = true
+          AND factoid_type = ${fact.factoid_type}
+          AND lower(btrim(title)) = ${fact.title.toLowerCase().trim()}
+        LIMIT 1
+      `;
+      if (existingFactoid) {
+        is_factoid = false;
+        factoid_type = null;
+        parent_factoid_id = existingFactoid.fact_id;
+        console.log(
+          `[extractor] dedupe-on-insert: "${fact.title}" → child of ${existingFactoid.fact_id}`,
+        );
+      }
+    }
+
     const [inserted] = await sql`
       INSERT INTO app.fact (
         source_note_id, source_ordinal, title, content,
         keywords, qe_text, confidence, memory_type, status,
-        is_factoid, factoid_type, expires_type
+        is_factoid, factoid_type, parent_factoid_id, expires_type
       ) VALUES (
         ${sourceNoteId}, ${i + 1}, ${fact.title}, ${fact.content},
         ${fact.keywords}, ${fact.qe_text}, ${fact.confidence},
         'short_term', 'raw',
-        ${fact.is_factoid}, ${fact.factoid_type}, ${fact.expires_type}
+        ${is_factoid}, ${factoid_type}, ${parent_factoid_id}, ${fact.expires_type}
       )
       RETURNING fact_id
     `;
