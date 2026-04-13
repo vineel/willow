@@ -1,7 +1,7 @@
 import { sql } from "./config";
 import type { CanonicalEvent } from "./jmap/types";
 import type { InterestMatch } from "./interest-matcher";
-import { executeAction, logExecution } from "./action";
+import { executeAction, executeActionTodo, logExecution } from "./action";
 import { createLogger } from "./logger";
 
 const log = createLogger("pib.dispatch");
@@ -58,8 +58,7 @@ export async function dispatch(
     }
   }
 
-  // Match intent handlers (future: execute builtin/agent/webhook/script handlers)
-  // For now, just log what would match
+  // Check intent category — auto-create todos for action.* intents
   const [fact] = await sql`
     SELECT intent_id FROM app.fact WHERE fact_id = ${factId}
   `;
@@ -69,6 +68,18 @@ export async function dispatch(
       SELECT category, subcategory FROM app.intent WHERE id = ${fact.intent_id}
     `;
 
+    if (intent?.category === "action") {
+      log.info(`Action intent detected (${intent.category}.${intent.subcategory}), creating todo via claude -p`);
+      const result = await executeActionTodo(event, extractedData);
+      await logExecution(factId, null, result.success ? "success" : "failed", result.durationMs, result.error);
+      actionResults.push({
+        interest: `auto:${intent.category}.${intent.subcategory}`,
+        success: result.success,
+        error: result.error,
+      });
+    }
+
+    // Match intent handlers (future: execute builtin/agent/webhook/script handlers)
     if (intent) {
       const handlers = await sql`
         SELECT id, handler_type, handler_ref FROM app.intent_handler
@@ -79,8 +90,6 @@ export async function dispatch(
       `;
 
       for (const handler of handlers) {
-        // Future: execute handlers based on handler_type
-        // For now, just log
         await logExecution(factId, handler.id, "skipped", 0, "Handler execution not yet implemented");
       }
     }

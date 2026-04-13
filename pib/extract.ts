@@ -200,6 +200,18 @@ function getDefaultSchema(category: string, subcategory: string): Record<string,
       new_date: "string",
       new_time: "string",
     },
+    "action.task": {
+      action_items: "string[]",
+      deadline: "string",
+      requestor: "string",
+      urgency: "string",
+    },
+    "action.request": {
+      request_summary: "string",
+      requested_action: "string",
+      deadline: "string",
+      requestor: "string",
+    },
   };
 
   return schemas[`${category}.${subcategory}`] ?? { summary: "string", key_details: "string" };

@@ -53,6 +53,55 @@ export async function executeAction(
   }
 }
 
+/**
+ * Execute a todo-creation action for emails classified as action.task or action.request.
+ * Uses claude -p with the todo MCP server to create todos from extracted data.
+ */
+export async function executeActionTodo(
+  event: CanonicalEvent,
+  extractedData: Record<string, unknown> | null
+): Promise<ActionResult> {
+  const parts: string[] = [];
+  parts.push("You are Willow, a personal AI agent. An email was classified as containing an action item or request.");
+  parts.push("Create one or more todos from this email using the add_todo tool. Set source to 'email'.");
+  parts.push("Set appropriate priority and due_date if a deadline is mentioned.");
+  parts.push("");
+  parts.push("EMAIL DETAILS:");
+  parts.push(`From: ${event.fromEntity.displayName} <${event.fromEntity.address}>`);
+  parts.push(`Subject: ${event.subject ?? "(no subject)"}`);
+  parts.push(`Date: ${event.receivedAt}`);
+
+  if (extractedData && Object.keys(extractedData).length > 0) {
+    parts.push("");
+    parts.push("EXTRACTED DATA:");
+    for (const [key, value] of Object.entries(extractedData)) {
+      if (value !== null && value !== "null") {
+        parts.push(`  ${key}: ${JSON.stringify(value)}`);
+      }
+    }
+  }
+
+  const bodyPreview = (event.bodyText ?? "").slice(0, 500);
+  if (bodyPreview) {
+    parts.push("");
+    parts.push("EMAIL BODY PREVIEW:");
+    parts.push(bodyPreview);
+  }
+
+  const prompt = parts.join("\n");
+  const mcpConfigPath = writeMcpConfig();
+
+  const start = Date.now();
+  try {
+    const result = await runClaudeP(prompt, mcpConfigPath);
+    return { success: true, output: result, durationMs: Date.now() - start };
+  } catch (err) {
+    return { success: false, output: "", durationMs: Date.now() - start, error: (err as Error).message };
+  } finally {
+    try { unlinkSync(mcpConfigPath); } catch {}
+  }
+}
+
 function composePrompt(
   event: CanonicalEvent,
   interest: Interest,
@@ -112,6 +161,11 @@ function writeMcpConfig(): string {
       "willow-memory": {
         command: "/Users/vineel/.bun/bin/bun",
         args: ["run", "--silent", `${willow}/mcp/memory-mcp/server.ts`],
+        cwd: willow,
+      },
+      "willow-todo": {
+        command: "/Users/vineel/.bun/bin/bun",
+        args: ["run", "--silent", `${willow}/mcp/todo-mcp/server.ts`],
         cwd: willow,
       },
     },
