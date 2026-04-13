@@ -45,7 +45,35 @@ Written: `notes/person-dedupe-strategy.md` (~280 lines). Read it before starting
 - Schema changes needed (Appendix B)
 - Phase 3 file list (Appendix C)
 
-### Phase 3 — Cleanup scripts ⏳ NEXT
+### Phase 3 — Cleanup scripts ✅ DONE (2026-04-13)
+
+Scripts written, committed in `c32d5ba`, applied live against the DB.
+Results captured in `notes/farley-assessments/2026-04-13-post-cleanup.json`
+and diffed against the pre-cleanup snapshot:
+
+| Metric                       | Before | After | Δ    |
+|------------------------------|--------|-------|------|
+| Active factoids              | 620    | 538   | -82  |
+| Person total                 | 262    | 186   | -76  |
+| Person matching junk regex   | 59     | 19    | -40  |
+| Duplicate groups             | 23     | 2     | -21  |
+| Factoids in duplicate groups | 66     | 5     | -61  |
+| Display-name collisions      | 9      | 1     | -8   |
+| Merges recorded              | 0      | 64    | +64  |
+
+**Applied:**
+- cleanup-factoid-types: 72 rows updated (42 Account reclassify, 23 playbook/command demote, 7 Place reclassify).
+- dedupe-factoids: 101 merges proposed, 64 applied (rest were transitive duplicates). LLM judge called on 104 review-zone pairs; it correctly rejected the vast majority of cross-service credential pairs and approved a few genuine dupes (Apple ID ≡ Gmail via shared email, oculus rift login ≡ oculus support login, Generate alternatives prompts ≡ related fact).
+- reparent-fragments: created 4 Unknown parents (Vineel, Brad, Neela, Amazon), reparented 32 fragments.
+
+**Residual issues to address in Phase 4 retro / Phase 5:**
+- 19 Person factoids still match junk regex — mostly tmux commands like "detach from tmux session" that the command-tool prefix rule (`^tmux\b`) doesn't catch because the tool name isn't at line-start. Tighten rule in next maintenance pass.
+- 207 factoids still have `factoid_type=NULL`. Dedupe skipped them because it requires a type. Needs a deferred LLM type-assignment sweep.
+- "Brad" Person factoid got absorbed into a Brad fragment during dedupe, so reparent created a *new* Unknown Brad parent. Next dedupe cycle will catch and merge. Same pattern may affect others.
+- Created parents are all `Unknown` type — Phase 5 seed will upgrade Vineel/Brad/Neela/family to Person with `human_verified=true`.
+- "amazon's hiring process" ×3 and "amazon interview" ×2 survive as duplicate groups because they're `factoid_type=null` (cleanup demoted them from factoids but their title duplicate state persisted).
+
+### Phase 3 — Cleanup scripts (original plan) — archived
 
 Three scripts, all `--dry-run` by default:
 
@@ -56,11 +84,11 @@ Three scripts, all `--dry-run` by default:
 
 Each: dry-run default, prints proposed changes, `--apply` writes inside a transaction.
 
-### Phase 4 — Run + retro ⏳ PENDING
+### Phase 4 — Run + retro ⏳ IN PROGRESS (2026-04-13)
 
-- Run Phase 3 scripts against live DB.
-- Review results with Vineel.
-- Write `notes/factoid-cleanup-retro.md` capturing threshold calibration, false-positive rate, false-negative discoveries, LLM judge agreement rate. Feeds the recurring maintenance job config.
+- Scripts run against live DB ✅
+- Results reviewed ✅ (see Phase 3 Results table above)
+- `notes/factoid-cleanup-retro.md` — TODO: threshold calibration, false-positive rate, false-negative discoveries, LLM judge agreement rate. Feeds the recurring maintenance job config.
 
 ### Phase 5 — Seed + unblock bootstrap ⏳ PENDING
 
