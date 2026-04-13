@@ -1,0 +1,4208 @@
+{
+  "timestamp": "2026-04-13T16:28:44.610Z",
+  "applied": true,
+  "hard_rule_count": 31,
+  "pass1_count": 175,
+  "pass2_count": 104,
+  "allowlist_size": 150,
+  "summary": {
+    "assigned": 73,
+    "demoted": 101,
+    "skipped": 105
+  },
+  "type_distribution": {
+    "Product": 26,
+    "Event": 11,
+    "Account": 5,
+    "Concept": 27,
+    "Person": 3,
+    "Organization": 1
+  },
+  "decisions": [
+    {
+      "pass": 1,
+      "fact_id": "9a9fa23b-4818-4e07-afa7-4063d04316c8",
+      "title": "GazeSpeaker Software",
+      "source": "from-evernote/Personal 2025/2025-07-22-eye-tracking-setup.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "GazeSpeaker is a named software tool for eye-tracking interaction, fitting the definition of a product (software)."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "5032a6c0-77d0-45c1-a996-73afa0c0adb3",
+      "title": "Managers",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a list/heading of multiple people rather than a single factoid entity; it functions as a reference document or index rather than a trackable first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "439a55a0-0ae7-424b-a33d-1861c31e5fb0",
+      "title": "Engineers",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a list/heading of people rather than a factoid itself—it's a grouping or section title from a reference document, not a standalone entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "0127c93e-43c1-42aa-bc9a-582cb12b0540",
+      "title": "CXO FE Platform - Hoboken",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "CXO FE Platform is a named product/platform with a specific location identifier (Hoboken), and the content lists team members associated with it."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "f7a2bc70-c754-4d55-b653-bad82473e06a",
+      "title": "POC and Pipeline",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Unknown",
+        "parent_hint": null,
+        "confidence": 0.6,
+        "reason": "This appears to be a reference list or group of people associated with a Walmart project context, but lacks sufficient definition as a discrete factoid (no clear relationship structure, event, organization, or concept being tracked)."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.60)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "1135182c-5e0c-4e6a-a37d-e1a9cf125ebe",
+      "title": "React Native",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "React Native is a well-known software framework/product for building mobile applications, despite the content listing three people's names."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "221fc16b-acda-434f-9952-a3798ba6ff3d",
+      "title": "Q3 Deliverables",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.65,
+        "reason": "Q3 Deliverables is a time-bounded project milestone or set of work outcomes associated with specific people, making it an event-like entity rather than a person, place, or organization."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.65)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "08e3bf77-8223-4cba-875f-573ce1341d55",
+      "title": "Walmart Course Details",
+      "source": "from-evernote/Walmart/2019-07-19-react-native-training.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a specific, bounded training occurrence at Walmart with defined duration (3-4 weeks), participant count (10 students), and cost, making it a particular event rather than an ongoing product or service."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6f731cb6-7dec-4e1b-9a2f-e8605b688164",
+      "title": "Master Services Agreement and Vendor Number",
+      "source": "from-evernote/Walmart/2019-07-19-react-native-training.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Account",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "A vendor number is a credential-bearing relationship to a service (Walmart's vendor system), making this an Account type despite also involving a contractual agreement."
+      },
+      "applied": true,
+      "note": "assigned Account"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d99f4b44-aa9f-4e39-927b-e05b9ea24ded",
+      "title": "Zoom link",
+      "source": "from-evernote/Walmart/2019-07-30-zoom-link.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Account",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "A Zoom meeting link with a specific ID represents a credential-bearing relationship to the Zoom service, functioning as an access credential to a specific meeting."
+      },
+      "applied": true,
+      "note": "assigned Account"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8c520c2a-1281-4362-9abd-27a4ffe8c401",
+      "title": "Payment Methods",
+      "source": "from-evernote/Walmart/2019-09-05-payment-methods.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "A list documenting available payment methods at a retailer is an abstract informational concept rather than a specific factoid, product, account, or concrete entity."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "33c9f8de-7188-4019-9d0b-9ef92b517e49",
+      "title": "Chime Meeting Issues and Solutions",
+      "source": "from-evernote/Amazon Job/2023-10-28-notes-on-making-chime-meetings-work.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a collection of implementation notes and troubleshooting questions about Chime functionality, not a factoid representing a distinct entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b5db7faa-a051-4ed3-b00e-6d9bb4ccd86c",
+      "title": "Running a Web Server",
+      "source": "from-evernote/Amazon Job/2023-07-31-using-javascript-on-my-laptop-uss-ganges.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "http-server is a named software tool/product that can be installed and run, making it a Product rather than an implementation note."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "76fb6602-6a5f-47f9-929c-b8aaeac836bd",
+      "title": "Python Web Server",
+      "source": "from-evernote/Amazon Job/2023-07-31-using-javascript-on-my-laptop-uss-ganges.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or technical instruction fragment describing how to use a built-in tool, not a distinct factoid worth tracking as a first-class entity in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "95d69eed-860b-40e4-919f-d64e00218ec7",
+      "title": "Amazon Interview Notes",
+      "source": "from-evernote/Amazon Job/2022-06-14-notes-from-amazon-interview.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This represents a specific occurrence bounded in time—an Amazon interview session that took place on 2022-06-14, with notes about discussion topics and participants."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "f8aacfcd-fd8f-40ec-9f6c-3b5875e60d03",
+      "title": "Amazon Interview",
+      "source": "from-evernote/Amazon Job/2022-06-14-notes-from-amazon-interview.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a specific, bounded occurrence in time (Session 2 of an Amazon interview on 2022-06-14) with particular discussion topics and participants."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "0e1f5e8d-698b-493c-8718-6fe358ebe829",
+      "title": "Amazon Interview",
+      "source": "from-evernote/Amazon Job/2022-06-14-notes-from-amazon-interview.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a specific occurrence bounded in time (an Amazon interview session that occurred on 2022-06-14), with details about participants and communication medium."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "f82bacea-b3fc-45c0-af13-2372f8503c21",
+      "title": "Jeremiah's Amazon Phone Screen Discussion",
+      "source": "from-evernote/Amazon Job/2022-05-06-jeremiah-talk-about-amazon-phone-screen.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a specific occurrence bounded in time: a phone screen interview discussion with Jeremiah about an Amazon position, documented on 2022-05-06."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "f5979773-2825-4da0-96e0-d6686513ae14",
+      "title": "Tinder app features and problems to solve",
+      "source": "from-evernote/Amazon Job/2022-05-30-tinder.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design document fragment describing features and requirements, not a factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "11cbeb79-d83e-42ba-b5bf-872350fb429b",
+      "title": "Travel Dates for Amazon Job",
+      "source": "from-evernote/Amazon Job/2022-06-24-amazon-starting.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "This describes a specific bounded occurrence in time (a trip with defined travel dates and activities) that is worth tracking as a first-class entity in a memory graph."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d120d9d9-042c-4631-8ccf-d6b6caf1db70",
+      "title": "Weekend Fun Trip and Group Dinner",
+      "source": "from-evernote/Amazon Job/2022-06-24-amazon-starting.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a specific bounded occurrence (a weekend trip and group dinner) that happened at a particular time, making it an Event."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e2e85da9-6b77-4293-8633-d1e4c929590a",
+      "title": "Tech Questions",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a system design interview question/prompt about an abstract technical concept (clustered caching systems) rather than a concrete factoid about a real occurrence, person, or artifact."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8db1fe69-b2a5-4f37-9e99-587447745aed",
+      "title": "Distributed Systems",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract idea/topic (designing a key-value store in a distributed system) that Vineel is tracking as a learning or interview preparation concept, not a concrete entity like a person, place, or product."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "2b8dff96-eb2d-4720-97f6-4891036cf730",
+      "title": "Coding skills",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract coding problem or algorithm concept worth tracking as a first-class entity, representing a category of technical knowledge Vineel is developing."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "dd8267de-bbbc-40a3-bfe2-af1a3b34388e",
+      "title": "Leadership skills",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a discussion topic or interview question prompt, not a factoid about a specific entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e59396df-28bf-4e6a-99a5-f469cec08353",
+      "title": "Hiring ability",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract idea about hiring criteria and evaluative qualities, not a concrete entity, making it a trackable concept worth remembering."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "071fdc32-6b19-41cb-833f-7ef78bc0542c",
+      "title": "Prioritization and Execution of responsibilities",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract idea about management methodology and decision-making strategy worth tracking, not a concrete entity or implementation note."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "891eceb3-2336-4510-b5ca-742b2e900539",
+      "title": "Umut Isik's Project Management at Amazon",
+      "source": "from-evernote/Amazon Job/2022-06-05-umut-isik-tpm-core.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Person",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This factoid describes Umut Isik, a specific individual, and captures information about their role and work at Amazon."
+      },
+      "applied": true,
+      "note": "assigned Person"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d4d3222a-a7c4-4025-bfc2-a5a5c5a6816d",
+      "title": "Walmart Payment System and Glass Project",
+      "source": "from-evernote/Amazon Job/2022-06-05-umut-isik-tpm-core.md",
+      "verdict": {
+        "action": "unsure",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0,
+        "reason": "parse failed: {\n  \"action\": \"assign\",\n  \"factoid_type\": \"Project\",\n  \"confidence\": 0.6,\n  \"reason\": \"This describes a specific interna"
+      },
+      "applied": false,
+      "note": "skipped (unsure, conf 0.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "21c3e007-540d-426b-a91b-3078ad837945",
+      "title": "Umut Isik's TPM Core Philosophy",
+      "source": "from-evernote/Amazon Job/2022-06-05-umut-isik-tpm-core.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract philosophical approach to TPM (technical program management) worth tracking as a first-class idea, rather than a person or specific event."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "2f57ab95-84af-4501-909c-a31049dbb5ff",
+      "title": "Leadership Principles and Hiring Manager",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a preparation document or study notes about interview topics and hiring practices, not a factoid itself—it's metadata about an interview process."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "5b1d3391-4d98-4b7e-af1f-877ae9f03d96",
+      "title": "Amazon's Hiring Process",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.7,
+        "reason": "This is a discussion/analysis of Amazon's hiring process and management structure, treating the hiring process itself as the subject being tracked rather than a specific event or organization."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.70)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "cb9004de-e772-442b-91af-1d6631e2647e",
+      "title": "Amazon's Hiring Process",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Person",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "The factoid is primarily about Dushara Paul, a specific individual, with notes about her role and direct reports at Amazon."
+      },
+      "applied": true,
+      "note": "assigned Person"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6f25eb40-179e-4389-9a58-b4010d1e3524",
+      "title": "Thushara Paul",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Person",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "Thushara Paul is a named individual referenced in a recruiting context with personal commentary about their capabilities."
+      },
+      "applied": true,
+      "note": "assigned Person"
+    },
+    {
+      "pass": 1,
+      "fact_id": "de72b341-4099-4398-96b3-3926e3d4028b",
+      "title": "Leadership Principles",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Leadership Principles is an abstract framework or set of guidelines worth tracking as a first-class entity, particularly in the context of job interview preparation."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "4487405f-1b11-47fd-9221-29331d772b4d",
+      "title": "Amazon's Hiring Process",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a fragment of notes/discussion about Amazon's hiring process and contains scattered observations rather than a self-contained factoid worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b84db0bc-1880-4028-bc5d-2a0987986ca6",
+      "title": "contact information for notsalty.net",
+      "source": "from-evernote/bizlog/2018-07-20-notsaltynet-soft-launch.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Account",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a credential-bearing relationship (email and phone contact information) associated with a specific service or domain (notsalty.net)."
+      },
+      "applied": true,
+      "note": "assigned Account"
+    },
+    {
+      "pass": 1,
+      "fact_id": "fcfa2992-a541-4abe-bd80-f7f793e7ac35",
+      "title": "ad performance SQL query",
+      "source": "from-evernote/bizlog/2018-08-15-sql-to-see-ad-performance.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a SQL query/code snippet and implementation note, not a factoid representing a real entity worth tracking in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c2c79f90-9e66-43ee-b203-f20fba397c34",
+      "title": "SEO articles for helping elderly parents",
+      "source": "from-evernote/bizlog/2018-08-09-helping-senior-parents-seo-articles.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This is a curated collection of SEO articles and resources about helping elderly parents, representing an abstract topic/area of interest worth tracking rather than a specific event, product, or person."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6b93e03b-fafb-4262-9bd3-b93863112807",
+      "title": "Create Facebook Page",
+      "source": "from-evernote/bizlog/2018-07-28-next.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a task or action item (a todo), not a factoid representing a real entity that exists or existed."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "339ce207-b64b-4b09-b7ea-f74140b4e2df",
+      "title": "SEO and sitemap discussion",
+      "source": "from-evernote/bizlog/2018-07-30-sitemapxml-and-seo-talked-to-durjoy.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a specific discussion/conversation that occurred on a particular date, bounded in time, making it an event despite the title appearing to be a discussion topic."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "58fcc7af-6574-408a-9fb3-9e820ef9dd89",
+      "title": "Architecture Assessment",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design assessment documenting a technical decision, not a first-class factoid that stands alone as a memorable entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "da1cc5df-6a49-4db2-927c-d50a38d0f113",
+      "title": "Updated-note path is incomplete",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.72,
+        "reason": "This describes an architectural design pattern or technical approach (nuke-and-replace strategy for fact updates) that is worth tracking as a conceptual entity in the memory graph."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.72)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a1f88937-ea5a-4cc1-930b-60da058694b7",
+      "title": "Short term memory mechanism is TBD",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note or design discussion fragment about a technical system, not a standalone factoid worth tracking in the memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a6eda64d-6e8e-49de-8ad9-78beb23cc33c",
+      "title": "Collapse ingest endpoints",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing a code refactoring task for API endpoints, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "82178f93-8539-4329-9a7f-c20256debc2e",
+      "title": "Worker section is blank",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note or design discussion about job type naming conventions, not a factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "42e5f6eb-9cf9-4eca-86c7-a3d8a51a3fa1",
+      "title": "Keyword extraction LLM call may not be needed",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or optimization idea from a design review document, not a first-class entity worth tracking in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "5494ba19-ecef-41d5-9278-8b924ee2e19c",
+      "title": "`initial_facts` query is undefined",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This is a design question about how to structure initial facts retrieval in a memory system—an abstract pattern/principle worth tracking, not a concrete implementation note."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "7c599ff3-3f59-45f1-9c6a-8f06f75bc4ae",
+      "title": "Missing `update_fact` endpoint",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note or feature request describing a missing API endpoint, not a factoid representing an entity in Vineel's memory."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "2253bd05-f908-418c-85b1-2ffec7ce25b3",
+      "title": "Single Bun Process",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an architectural pattern/design approach where multiple concerns run within a single Bun process, making it an abstract technical concept worth tracking."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e067a61e-e475-4f3e-838d-5502a962a58a",
+      "title": "Watcher behavior",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing technical behavior of a system component, not a first-class entity worth tracking in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a2028e6c-8c57-415a-a591-f27a30dd1055",
+      "title": "Worker behavior",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.8,
+        "reason": "This describes the behavioral characteristics and configuration patterns of a system component (Graphile Worker), making it an abstract architectural concept worth tracking rather than a concrete product or technical implementation detail."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.80)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8998f2d6-157c-4e8f-8c98-871fd82a8526",
+      "title": "/api/ingest/* HTTP endpoints are optional",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an architectural design principle or system feature about optional HTTP endpoints, which is an abstract idea worth tracking in a technical memory system."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "72824626-4f16-46fc-982c-38947d66d888",
+      "title": "Suggested Facts Table Schema",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is a database schema definition from a technical document, not a factoid worth tracking in the memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "79f7e0d3-a653-49a2-b9c0-f3843b63bc0c",
+      "title": "memory server",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "A planned standalone HTTP server is a named tool/product being designed as part of the Willow project infrastructure."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "0f697a1b-2aaa-4c0e-8c35-940120d2e0e6",
+      "title": "memory server endpoints",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a set of API endpoints that form part of a memory server system/service being built."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e2a5865e-0b27-4f1e-9890-3f7fdef57dd6",
+      "title": "Tech Stack",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note describing technical choices for a project, not a factoid worthy of tracking as a first-class entity in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c28c2a1a-f026-44df-8e0d-fd1c85d4c0c0",
+      "title": "token usage implications",
+      "source": "inbox/accordli/ideas/2026-03-21-openclaw-token-usage.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract idea about how LLM vendors' pricing models work, worth tracking as a first-class entity in Vineel's memory."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "47bd610e-aff3-46d2-adf9-4eea3b306b63",
+      "title": "token reduction strategies",
+      "source": "inbox/accordli/ideas/2026-03-21-openclaw-token-usage.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract idea about strategies for reducing token consumption in LLM usage, worth tracking as a first-class entity in a personal knowledge graph."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6cc4f4a7-ff1f-439c-bc73-45aa72d04ae6",
+      "title": "Microsoft's new python lib",
+      "source": "inbox/accordli/ideas/2026-02-05-word-conversion.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "This is a named software library/tool created by Microsoft for converting office formats to markdown, which fits the Product type definition."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "feb86717-f90b-4bd8-aae5-37541b7d8e74",
+      "title": "Node/JS opensource converter",
+      "source": "inbox/accordli/ideas/2026-02-05-word-conversion.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a named software tool/project (word-to-markdown-js) that converts documents, fitting the Product type definition."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a4bef1f0-b1fd-4a55-bb27-9364cd6bde9c",
+      "title": "Contract document process",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is a procedural implementation note or workflow description documenting how to process contract documents, not a factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "fd4fe426-5339-4bc5-919e-203933717926",
+      "title": "Build now: Upload dialog wizard and text extraction",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.7,
+        "reason": "This describes a technical approach or design pattern for file handling and text extraction that Vineel is tracking as a conceptual reference, rather than a specific implementation task."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.70)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8db2c19f-6fcb-4d16-bcff-639f7a44e4a1",
+      "title": "Build later: Paragraph map and HTML generation",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a scratch task or implementation note describing future work items, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "ff7f39b8-2ccb-4b7c-89cd-d2f1dc21014c",
+      "title": "Prompt template for contract analysis",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is an abstract idea about a reusable prompt template for contract analysis—a methodology or pattern worth tracking, not a concrete deliverable or implementation detail."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "4b99d465-bf3b-4711-b269-9a68b6f139a1",
+      "title": "Sample issue from db",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a data structure example or implementation note showing a database schema/sample record, not a factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "9a42dacc-61f3-49e4-942f-de29d24682c9",
+      "title": "contract_analysis_prompt",
+      "source": "inbox/accordli/prompts/2026-02-06-issue-prompt-attempt-1.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a reusable prompt template for contract analysis methodology, representing an abstract analytical framework rather than a specific contract instance or tool."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "40c52936-f52a-411d-92a1-16d86c625f83",
+      "title": "Update project documentation",
+      "source": "inbox/accordli/prompts/2026-02-17-update-docs.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Unknown",
+        "parent_hint": null,
+        "confidence": 0.6,
+        "reason": "This describes a task or action item (updating documentation files) rather than a trackable entity, but could be retained as an Unknown factoid if Vineel wants to track documentation projects as first-class items."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.60)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a08e1fea-d957-453b-a729-0bcc987e0fae",
+      "title": "Lessons learned from using CLAUDE",
+      "source": "inbox/accordli/prompts/2026-02-17-update-docs.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This is a reflection on lessons learned about documentation practices and tool usage, representing an abstract idea or principle worth tracking rather than a specific occurrence, product, or entity."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "88b11b35-c865-4e84-88a4-14914873f6b8",
+      "title": "Categorize Vineelernotes",
+      "source": "inbox/accordli/prompts/2026-01-30-categorize-vineelernotes.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a task/prompt document describing work to be done on a notes repository, not a factoid worthy of tracking as a first-class entity in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6755c983-20e0-4234-91b8-ddee405e93f3",
+      "title": "Accordli Document Evolution Process",
+      "source": "inbox/accordli/docx-evolver/2026-03-02-thinking-at-the-library.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a documented workflow or process pattern for document evolution in the Accordli system, which is an abstract idea worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "40c6d822-b82a-467f-9d65-08225548518d",
+      "title": "Edit Process",
+      "source": "inbox/accordli/docx-evolver/2026-03-02-thinking-at-the-library.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design thinking about how an editing system should work, not a factoid representing something itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a5ed6e5a-1d47-47e5-9023-8e39ec950529",
+      "title": "Reconstruct Process",
+      "source": "inbox/accordli/docx-evolver/2026-03-02-thinking-at-the-library.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an abstract procedural concept for document reconstruction involving template merging and transformation, not an implementation note but rather a named process worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "f3277a5b-8481-440e-af5e-e263efbca83a",
+      "title": "Qjob and Matter Project Planning",
+      "source": "inbox/accordli/todo/2026-02-04-more-thinking.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a design note or implementation discussion about database schema naming decisions, not a factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8a2b1aec-38a2-450f-8574-3774f5c0f93b",
+      "title": "Redline Text Handling",
+      "source": "inbox/accordli/building-accordli/2026-02-18-redline-text.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note/design discussion documenting an architectural problem and solution approach, not a factoid entity itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b9601324-f0c2-49c0-ac68-e8bb661ee3c7",
+      "title": "Admin Observation of Prompting",
+      "source": "inbox/accordli/building-accordli/2026-02-13-admin-observation-of-prompting.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes an abstract feature specification or design pattern (admin-restricted footer functionality) rather than a concrete entity, making it a Concept worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d75919be-9a46-43f3-960c-b1faffba39fc",
+      "title": "Q Observer Page Details",
+      "source": "inbox/accordli/building-accordli/2026-02-13-admin-observation-of-prompting.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Q Observer is a named admin page/tool that displays data from a qjob table, functioning as a software feature or product component."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "172e187f-516a-4556-96ec-2cb198dd8d9d",
+      "title": "Column Details for Q Observer",
+      "source": "inbox/accordli/building-accordli/2026-02-13-admin-observation-of-prompting.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note describing database schema/column structure for a technical system, not a trackable factoid in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "86b52adc-47f4-4c59-bedb-7670d05631c3",
+      "title": "Word Export Feature Task",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a feature specification or implementation task describing how a UI feature should work, not a first-class factoid worthy of memory tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "19ff21bb-8f41-46a3-9fd5-081c06ebe8e9",
+      "title": "Bug in Exporting Staged Edits",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is a scratch note describing a bug encountered during development work, not a factoid representing a discrete entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6ea40eaa-560b-4a3c-ac5d-182c7e97ece3",
+      "title": "Generalize Section Refs in Contracts",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes a technical capability or feature area (generalizing section reference handling in contracts) that is worth tracking as an abstract design/implementation goal."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "dde600e3-470a-4fd9-94e4-e32403f1b598",
+      "title": "Simulate Front End Pipeline Script",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is a scratch task/todo describing a script to be written, not a factoid representing something that exists or should be tracked."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "040a2c97-d73b-415c-8381-7df33c68e28d",
+      "title": "Claude Sanitizer Integration",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Claude Sanitizer Integration is a named tool/functionality with documentation and integration instructions, fitting the Product category."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "39b38e22-8f08-4da9-8eec-63ae2aef0777",
+      "title": "Runtime Sanitize Switch",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.72,
+        "reason": "This is a feature specification or design idea for a runtime parameter, which is a technical concept worth tracking as a first-class entity in the personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.72)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "86e20ff2-bcad-443d-84f2-2f1f0853d883",
+      "title": "deploy script",
+      "source": "inbox/accordli/building-accordli/2026-03-25-deploy-and-reset-db.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is a scratch task/todo describing a script to be written, not a factoid about something that exists."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e6482a8f-b895-4f04-94fe-51e09012ab6b",
+      "title": "Matter Page Sections",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a structural description of UI sections within a product, functioning as implementation documentation rather than a trackable factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "bacedfc6-cc5f-4c56-a3b0-449556ea8e43",
+      "title": "Top Section Details",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or documentation heading describing the structure of a UI component, not a factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c5c17817-dc04-4318-95f0-dd4e8e712bfb",
+      "title": "Version Tab Details",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a feature or system design pattern (versioning with multiple sections) that represents an abstract architectural idea worth tracking, rather than a concrete product, place, or event."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "121bb7a3-44a0-490d-b0b8-7e9eef08c04b",
+      "title": "Documents Section",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a structural heading describing document organization/workflow within a file, not a trackable factoid."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "3a96d698-a61c-40c1-86a5-db2845d72276",
+      "title": "Staged Edits Section",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or heading describing a section structure from a document, not a standalone factoid worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "91af2a66-c7af-41ac-8ebe-fdc8d8ff9fab",
+      "title": "Key Issues Section",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a structural note describing a section format/template within a document, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "1507a0e9-5e83-476f-bd4e-8f55c6f7a822",
+      "title": "address issue page plan",
+      "source": "inbox/accordli/building-accordli/2026-02-09-address-issue-page.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.7,
+        "reason": "This describes a planned feature or page design pattern in a software product, which is an abstract idea worth tracking as a first-class entity in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.70)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c09ee832-b338-4b28-b4d0-66c031bae4db",
+      "title": "generate alternatives dialog plan",
+      "source": "inbox/accordli/building-accordli/2026-02-09-address-issue-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation plan or technical specification document (a heading with detailed work instructions), not a first-class factoid worth tracking in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e1b1ea7d-ab85-4dcd-9caa-1f984ced4083",
+      "title": "create issueclause table",
+      "source": "inbox/accordli/building-accordli/2026-02-09-address-issue-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note describing a database schema design, not a factoid worth tracking in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "288c85a6-5ac6-43a4-b2d7-16e3cd30f9b2",
+      "title": "River queueing system for LLM queries",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "River is a named go library/tool for queueing with specific technical capabilities, fitting the definition of a product."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "4f2c72b9-b389-4fa9-b2a6-84fd82606d4d",
+      "title": "qjob table structure",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a database schema specification or technical documentation artifact, not a first-class factoid worth tracking in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b4e9c0fe-48ab-4880-b3a2-614d30bec997",
+      "title": "Refactor extract facts functionality",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a design idea or architectural pattern (PromptWorker-based refactoring) worth tracking as an abstract concept rather than a concrete implementation task or todo."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d11ffb67-87de-4958-aaea-0bb10c85d741",
+      "title": "Prompt template table",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.8,
+        "reason": "A prompt template table is a conceptual data structure worth tracking as part of a system design, representing an abstract organizational schema rather than a concrete product, place, or event."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.80)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "26df1858-541b-45b2-846a-75101de659ab",
+      "title": "Metrics to the job",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.7,
+        "reason": "This describes an abstract design idea (adding a jsonb column to track LLM job metrics) worth tracking as a first-class entity in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.70)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "31333052-7da9-4a6f-8744-3fc23e5f21dc",
+      "title": "Job status API",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes a named API service with specific functional specifications, making it a product/tool being developed."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "5e478af3-6c47-45ed-8abd-9d1bbac18e4a",
+      "title": "Multistep prompt jobs",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a scratch task or implementation note describing future work to be done, not a factoid representing a real entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "89d0a2df-4567-4cbf-b5e0-69d4185450cc",
+      "title": "Admin UI",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "Admin UI is a named software feature/component that could be tracked as a product or part of a product offering."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "3ff0d8f0-5fb7-4965-94d4-0b5af8e8378c",
+      "title": "Prompt template editor",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.7,
+        "reason": "A prompt template editor is a named tool or feature being considered for development, making it a product-like entity rather than a task or note."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.70)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b74b18e6-7301-4792-8cf8-9ba751c4726a",
+      "title": "Run viewer",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a scratch task or todo item describing a feature to be implemented, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "88266a35-c7e4-4b1c-b084-22db5f3b579f",
+      "title": "building-accordli",
+      "source": "inbox/accordli/building-accordli/2026-03-04-building-accordli.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.6,
+        "reason": "This appears to be a named project that Vineel is actively working on, but 'Project' is not a valid type; it best maps to 'Product' as a named initiative/tool being developed, though 'Unknown' is also reasonable."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.60)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d0650c9f-77c2-4796-a649-fb3824891ffb",
+      "title": "Add Version Feature Documentation",
+      "source": "inbox/accordli/features/2026-02-17-add-version.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an abstract feature or capability (versioning in a negotiation workflow) that is worth tracking as a first-class entity in the knowledge graph."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c230f417-81ae-46b9-b6f5-211afb602710",
+      "title": "Prerequisites for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This is a collection of system prerequisites and installation instructions for a project/system called terokNor, representing an abstract set of required dependencies and setup rather than a concrete entity."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c0b23912-402f-497d-86a7-e413ed12d87d",
+      "title": "API keys for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Account",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a collection of API credentials (ANTHROPIC_API_KEY, RESEND_API_KEY) representing credential-bearing relationships to services."
+      },
+      "applied": true,
+      "note": "assigned Account"
+    },
+    {
+      "pass": 1,
+      "fact_id": "1b5d663f-f17a-4299-99af-581688170ed1",
+      "title": "Python dependencies for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This is a named collection of dependencies for a project (terokNor) that represents an abstract, trackable concept rather than a physical product, person, or event."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8adc1c4a-2285-48f3-9cb7-993b499263d7",
+      "title": "Check installed versions for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a shell command snippet used for checking installed software versions, not a factoid worth tracking as a first-class entity in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "bdd31f81-424c-484d-bf95-9dd2db79be8f",
+      "title": "Sesame Street Stickerworld Project",
+      "source": "from-evernote/Amazon Job/2022-05-06-amazon-leadership-principles.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Sesame Street Stickerworld Project is a named product/service with specific features (stickers, clubs, animations) that Vineel worked on and iterated."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "0b010c42-9cb6-4ac4-9ac9-3f0ae49264a4",
+      "title": "Salido",
+      "source": "from-evernote/Amazon Job/2022-05-06-amazon-leadership-principles.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "Salido is a named restaurant management system/software product that was used by restaurants, with features like kitchen order streaming."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "41ee6afd-e3c4-441e-9d3a-28490a5729fe",
+      "title": "Behavioral Questions",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a specific interview or conversation that occurred on a particular date (2022-05-16) where behavioral questions were discussed, making it a bounded temporal occurrence."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "2f91f511-70b0-4db3-bac6-d0b82b8d3dc8",
+      "title": "System Design",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This represents a specific system design interview question/session that occurred on 2022-05-16 at Amazon, bounded in time and context."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 1,
+      "fact_id": "bcbfe2ec-077f-4236-9d2f-cf786501f583",
+      "title": "PC/Mac to S3 Bucket Storage",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an abstract system architecture for file synchronization between personal computers and cloud storage, representing a technical design concept rather than a concrete product, place, person, or event."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "5bbc377b-bf1c-4fe6-ab6e-6815b8c0cf47",
+      "title": "Functionality",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a specification or requirements list for a system design interview question, not a factoid representing a distinct entity to be tracked in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "78aeb2ad-d174-4681-9513-bdef549ad41f",
+      "title": "Client",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a design note or implementation detail discussing file synchronization mechanics, not a factoid about something itself."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "77fb1e24-4673-4e6b-9d58-dd83f17354b7",
+      "title": "API Server",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "API Server is an architectural component/design concept discussed in a system design interview, representing an abstract service responsible for authentication, authorization, and resource management rather than a concrete product or tool."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "4f84ee08-93b0-4c7d-8c42-eeb65ee92b31",
+      "title": "Bucket Server",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a named service/tool ('Bucket Server') with specific technical characteristics and design requirements that Vineel is tracking as a concrete deliverable."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d6ccdf4e-0bc5-4cf1-ac6e-fea2dc844629",
+      "title": "Colleges being considered for Zeph",
+      "source": "inbox/accordli/2026-03-12-colleges-for-zeph.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a curated list representing an abstract idea or decision-making category (college options under consideration) rather than a single concrete entity."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "666dcb0f-e619-4925-a23b-29e7ec40215e",
+      "title": "Full list of NY State colleges",
+      "source": "inbox/accordli/2026-03-12-colleges-for-zeph.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This is a curated list/collection of New York State colleges organized by classification and location, functioning as a reference concept rather than a single discrete entity."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "1f66eb0b-684c-44c1-beb0-38d0cd6810de",
+      "title": "Contract Analyst Section Headings",
+      "source": "inbox/accordli/ideas/2026-01-26-contract-analyst-section.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design specification describing UI section headings and structure for a product feature, not a standalone factoid worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "ad13159a-8f6f-4bb7-afec-d044d06f7e47",
+      "title": "Clarification on Tabs and B4",
+      "source": "inbox/accordli/ideas/2026-01-26-contract-analyst-section.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is a discussion/clarification message about UX design concepts, not a factoid itself — it's a conversational exchange seeking clarification on existing ideas rather than describing a distinct entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "7c531ffb-1369-4fd7-a1c4-076a831e99e4",
+      "title": "Staged Edits and Tools",
+      "source": "inbox/accordli/ideas/2026-01-26-contract-analyst-section.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design discussion about a feature ('Staged Edits and Tools'), not a factoid representing a distinct entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "2571d130-02d1-4570-81b5-fc4146290b50",
+      "title": "redline typescript function",
+      "source": "inbox/accordli/ideas/2026-02-01-redline-typescript-function.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "A named TypeScript function/utility (`redlineMarkdown`) with specific options and implementation, representing a reusable code tool or library component."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "06ce0c1c-715c-4fa8-ae1c-856aca55ad36",
+      "title": "Matter Page and Analysis",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an abstract UI/workflow pattern (the Matter page structure and its components) within a legal software system, which is an idea worth tracking as a first-class entity rather than a concrete product, place, or person."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "dbfe2f79-1dfc-449b-8e20-85c1342a6d47",
+      "title": "Analysis Sections and Artifacts",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes a feature pattern (deep dive buttons, artifact saving) that represents an abstract interaction design concept worth tracking in the memory graph."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "60892724-bd2d-4070-9f57-4ce44980192f",
+      "title": "Negotiation Tools",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Negotiation Tools is a named feature/capability set within a software workbench designed to assist users with specific tasks."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d6e361cf-b721-4ba7-8012-3dcdadacfc13",
+      "title": "Performance Analysis Tools",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.8,
+        "reason": "This describes a named feature/tool suite within a software product (Accordli Workbench), making it a Product type."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.80)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "ff02a94a-b128-4ce6-a6c5-dc0649195825",
+      "title": "Reports Generation",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Reports Generation is a named feature/tool within a workbench system that generates specific outputs (Operations Report, Audit Report), fitting the definition of a product or service."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "453634e8-e050-4009-a46b-9f57818d0d56",
+      "title": "split window command",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.72,
+        "reason": "This is a desired development workflow pattern or idea worth tracking, rather than a concrete tool, product, or task—it represents a conceptual goal of automating window setup through a single command."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.72)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "df06ee65-4bdc-449c-9f1d-8d7ffb8d80da",
+      "title": "api pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Unknown",
+        "parent_hint": null,
+        "confidence": 0.6,
+        "reason": "This describes a terminal pane configuration for running an API locally, which is a technical setup artifact rather than a person, place, organization, event, product, account, or abstract concept."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.60)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "0f2a3d0f-418e-4b65-a1ba-17b781fe5973",
+      "title": "worker pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a configuration note describing a terminal pane setup with shell commands, not a factoid representing a distinct entity in the memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "54b2e175-317c-4de8-b90a-5b45ad445f16",
+      "title": "fe dev pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a terminal/shell configuration snippet documenting how to set up a development pane, functioning as an implementation note rather than a trackable factoid."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "bd221b47-e243-4e3b-b4b4-c42ccb9c4108",
+      "title": "commands pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Unknown",
+        "parent_hint": null,
+        "confidence": 0.6,
+        "reason": "This describes a terminal pane configuration with shell commands and appearance settings, which is a legitimate tracked entity but doesn't fit standard types; it's a technical setup artifact worth remembering."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.60)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "39a024fe-d1cf-422e-8968-da7bbaa725a6",
+      "title": "Chaining Jobs",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a design discussion/question about job sequencing in a technical system, not a factoid representing a real entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e0074537-c83e-4c73-8fc7-97bbef7cf1be",
+      "title": "Separate Worker File",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note/design question about code organization, not a factoid worth tracking as a first-class entity in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a8703782-d36a-40b2-80dc-570d85e4a1e4",
+      "title": "Output Parsing",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note discussing a code refactoring task, not a first-class factoid worth tracking in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "f711f7d0-db79-44b4-9149-5fc81bdb75a2",
+      "title": "Prompt Building",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation discussion note about prompt building architecture, not a first-class entity worth tracking in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "55cc1692-04f6-4b62-8f40-938d66ea82b4",
+      "title": "Issue and Staged Alternatives",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "unsure",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0,
+        "reason": "This appears to be a document heading or section outline describing a layout pattern rather than a trackable factoid itself."
+      },
+      "applied": false,
+      "note": "skipped (unsure, conf 0.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b69984e4-f4da-4fd1-9e88-6e382ef36b45",
+      "title": "Staged Alternatives",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.7,
+        "reason": "This is a contract clause about liability limitations that represents an abstract legal principle worth tracking as a reusable concept across agreements."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.70)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "96ff7440-5b1e-4498-bed9-0b39418658cc",
+      "title": "Accordli Interaction Loop",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an abstract workflow or process pattern for how Accordli operates, which is a trackable conceptual entity rather than a concrete occurrence or implementation detail."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b178606c-58ff-45d9-9187-735be30f97ba",
+      "title": "Generate Clause Text",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes an abstract idea or feature concept for a system (generating customized clause text based on issue inputs), which is worth tracking as a first-class entity in a project context."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "937704e0-a945-4697-be4d-098950153de2",
+      "title": "Compare Button",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or feature specification describing UI functionality to be built, not a factoid about something that exists or has occurred."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "12b30ba1-46c7-4c18-a07d-c1499bfb44e3",
+      "title": "Staging Server Logs",
+      "source": "inbox/accordli/building-accordli/2026-02-24-staging-server.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes a system and practice for accessing and managing logs on a staging server, which is an abstract operational concept worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "43c15275-a1a4-472e-9218-9f2ed758d677",
+      "title": "Starting and Stopping Processes",
+      "source": "inbox/accordli/building-accordli/2026-02-24-staging-server.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes a procedural approach or methodology for managing processes on a staging server, which is an abstract operational concept worth tracking rather than a concrete entity."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "373d8c8e-877b-4edb-b83d-632ae5cf03c4",
+      "title": "Manually Making Users",
+      "source": "inbox/accordli/building-accordli/2026-02-24-staging-server.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 1,
+        "reason": "This is an implementation note or procedural instruction from a documentation file, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 1.00)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "70dfcc3f-758a-47b2-9406-92564f3da774",
+      "title": "Authentication & Multi-Tenancy",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "This describes abstract architectural/feature concepts (authentication patterns, multi-tenancy principles, JWT tokens, role-based access) rather than a concrete product, person, place, or event."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "ffb6b53e-c1cd-4f9b-a57f-526f1a41c8de",
+      "title": "Matter Management",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Matter Management is a named feature/tool within a product (Accordli) that provides specific functionality for managing legal matters through dashboards and workflows."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "b13bf461-4281-4e1f-afdd-11d37976e306",
+      "title": "Contract Analysis Pipeline",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a named service/tool (Contract Analysis Pipeline) with specific technical capabilities and components that form a product offering."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6699e4bd-0940-47aa-9d2e-ed7e70062fa2",
+      "title": "Issue Tracking",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Issue Tracking is a named feature/tool within Accordli's product specification with defined functionality, types, and user interactions."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "d1555e44-7330-44d6-b2fc-5d8e2b10662f",
+      "title": "Clause Alternatives",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "Clause Alternatives is an abstract idea describing a feature or capability for generating and scoring alternative legal clause language, worthy of tracking as a first-class entity in a product system."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "ec4186ed-3e16-4d44-abdc-56497195bc99",
+      "title": "Staged Edits & Export",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a specific feature or capability (staged edits with export functionality) of what appears to be a product or service offering."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "63dc3230-0b12-4034-93c2-d9bda35c85f1",
+      "title": "Version Comparison",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a feature specification/design document section describing implementation details and UI components, not a discrete factoid worth tracking in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "c226c991-4d58-445c-82e9-99a0f1183932",
+      "title": "Architecture",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing technical architecture details from a product spec document, not a discrete factoid worth tracking as a first-class entity."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6f00d9d1-d3ab-4b56-b906-d14ed7ef3873",
+      "title": "Domain Model",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes an abstract structural framework for organizing legal document entities and their relationships, which is a conceptual model rather than a concrete thing."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6ef88374-aa0a-4ed9-a561-caa8c5e25af9",
+      "title": "Terminology",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a collection of abstract domain-specific terms and concepts used within a legal/contract management system (Accordli), representing the vocabulary of ideas worth tracking rather than concrete entities."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e78459b7-ccdb-457c-8708-d3e86beb8583",
+      "title": "PostgreSQL as a db",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "PostgreSQL is a named database management system (software product) that Vineel tracks usage of across projects."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "1700052d-14d1-47d7-8f61-e0e80730d0f3",
+      "title": "Neon PostgreSQL hosting",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.9,
+        "reason": "Neon is a named PostgreSQL hosting service/product offering."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "3d51691a-b289-4a7a-99d0-9fb3d2f6ed79",
+      "title": "PostgreSQL for hosting",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "PostgreSQL is a named database software product being discussed in the context of a technical use case (hosting)."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8e7546cc-c94c-41e2-acf2-2b6c483b342a",
+      "title": "postgresql on vinapps",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "unsure",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.3,
+        "reason": "Unclear whether this is a search query/discussion topic (demote-worthy) or a genuine factoid about PostgreSQL infrastructure on a platform called VinApps; content description is too vague to confidently assign a type."
+      },
+      "applied": false,
+      "note": "skipped (unsure, conf 0.30)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e72ce6e6-51dc-41e9-8d0c-d04c1774eff4",
+      "title": "JawsDB PostgreSQL",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.92,
+        "reason": "JawsDB PostgreSQL is a named database hosting service/product offering PostgreSQL as a managed database solution."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "dd5f6a8a-b2ec-4426-83d2-8b6f0c6f461b",
+      "title": "RocksDB and PostgreSQL",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a search result or discussion topic about technical integration, not a standalone factoid worth tracking in a personal memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "bdfce899-4f70-4911-9595-367779965840",
+      "title": "PostgreSQL for configs and API keys",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes a design pattern or architectural approach of using PostgreSQL as a storage mechanism for configs and API keys, which is an abstract idea worth tracking rather than a concrete product, tool, or account."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "acd45c4f-e0a5-4937-abf6-f550c534a08e",
+      "title": "Fast paging with MongoDB",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a search query or discussion topic comparing two technologies, not a factoid worthy of first-class entity status in a memory graph."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "de897b2c-dc69-4628-b3ec-906e74590bc8",
+      "title": "PostgreSQL in Rails server",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a search query or discussion topic about using PostgreSQL with Rails, not a factoid representing a specific entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "fce40128-71df-49c8-94b1-165d800deb44",
+      "title": "River and PostgreSQL",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "River is a named software library/tool built on PostgreSQL, making it a Product."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "1bc27d50-63d8-4122-8e63-78b7b86f9c84",
+      "title": "PostgreSQL connection string",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Account",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "A PostgreSQL connection string is a credential-bearing relationship to a database service, which fits the Account type."
+      },
+      "applied": true,
+      "note": "assigned Account"
+    },
+    {
+      "pass": 1,
+      "fact_id": "783c425a-7998-49f7-996c-3b92837b0f4b",
+      "title": "Product Spec Database",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This appears to be an implementation note or technical documentation fragment about database setup rather than a factoid representing a distinct entity worth tracking."
+      },
+      "applied": false,
+      "note": "skipped (demote, conf 0.95)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "e9fc97c0-7ac7-4492-8368-74d5edc6ffa9",
+      "title": "API Gateway URLs",
+      "source": "from-evernote/Amazon Job/2023-01-19-chime-sdk-workshop.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Account",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "An API Gateway URL with credentials embedded represents a credential-bearing relationship to an AWS service."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "fd1e8e70-aa0d-4541-b24a-dcd2735648ef",
+      "title": "Lambda Function Details",
+      "source": "from-evernote/Amazon Job/2023-01-19-chime-sdk-workshop.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "A named Lambda function is a specific cloud computing service/tool instance, making it a Product."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "5d8e78c7-426c-4e67-8e14-37039520e420",
+      "title": "HBO in General",
+      "source": "searches/2026-02-10T19-52-00-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Organization",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "HBO is a specific media company/organization, and the factoid tracks it as a distinct entity worth noting in the memory graph."
+      },
+      "applied": true,
+      "note": "assigned Organization"
+    },
+    {
+      "pass": 1,
+      "fact_id": "8092344e-1265-43e3-8104-c18bf0ef6749",
+      "title": "HBO as a Product",
+      "source": "searches/2026-02-10T19-52-00-search.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Product",
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "HBO is a named media service/product offering streaming and television content."
+      },
+      "applied": true,
+      "note": "assigned Product"
+    },
+    {
+      "pass": 1,
+      "fact_id": "6672b7de-7ecc-485c-9314-7c14793ce3c8",
+      "title": "HBO in a Product Context",
+      "source": "searches/2026-02-10T19-52-00-search.md",
+      "verdict": {
+        "action": "unsure",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.3,
+        "reason": "The title and content are too vague to determine whether this is a factoid about HBO itself (Organization or Product) or a meta-note about HBO appearing in a product context; more concrete information needed."
+      },
+      "applied": false,
+      "note": "skipped (unsure, conf 0.30)"
+    },
+    {
+      "pass": 1,
+      "fact_id": "a0d08145-7d87-4393-844d-7b0d0d80eda7",
+      "title": "Memory features & Nate's approach",
+      "source": "inbox/accordli/willow/2026-04-08-working-on-a-new-memory.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.75,
+        "reason": "This describes an abstract idea about memory features and concurrent processing approaches, rather than a specific occurrence, person, or product."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.75)"
+    },
+    {
+      "pass": 2,
+      "fact_id": "5032a6c0-77d0-45c1-a996-73afa0c0adb3",
+      "title": "Managers",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "CXO Leadership Team",
+        "confidence": 0.95,
+        "reason": "This is a list of managers that belongs as content under an existing parent factoid rather than as a standalone factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of CXO Leadership Team"
+    },
+    {
+      "pass": 2,
+      "fact_id": "439a55a0-0ae7-424b-a33d-1861c31e5fb0",
+      "title": "Engineers",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Engineering Managers",
+        "confidence": 0.9,
+        "reason": "This is a list/heading of engineers rather than a factoid itself; the individual people (Virav, Vaybhav, Ian Swan, Puneeth) should each be separate Person factoids."
+      },
+      "applied": true,
+      "note": "demoted → child of Engineering Managers"
+    },
+    {
+      "pass": 2,
+      "fact_id": "f7a2bc70-c754-4d55-b653-bad82473e06a",
+      "title": "POC and Pipeline",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a heading/label for a list of people rather than a factoid itself; the actual factoids are the individual people listed (Bob Obringer, Brian Yingling, Tymko Tecca)."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "221fc16b-acda-434f-9952-a3798ba6ff3d",
+      "title": "Q3 Deliverables",
+      "source": "from-evernote/Walmart/2019-07-25-people-to-know.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a heading/label from a document listing people to know, not a factoid itself; the actual factoids are the individual people mentioned (Siva Panugotti, Ben Coleman, Henry Chan)."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "8c520c2a-1281-4362-9abd-27a4ffe8c401",
+      "title": "Payment Methods",
+      "source": "from-evernote/Walmart/2019-09-05-payment-methods.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a list/note documenting payment methods available at Walmart rather than a factoid representing a distinct entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "33c9f8de-7188-4019-9d0b-9ef92b517e49",
+      "title": "Chime Meeting Issues and Solutions",
+      "source": "from-evernote/Amazon Job/2023-10-28-notes-on-making-chime-meetings-work.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Job Details",
+        "confidence": 0.95,
+        "reason": "This is a discussion topic or notes document about troubleshooting Chime functionality rather than a factoid itself; it belongs as content under the Amazon Job Details parent."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Job Details"
+    },
+    {
+      "pass": 2,
+      "fact_id": "76fb6602-6a5f-47f9-929c-b8aaeac836bd",
+      "title": "Python Web Server",
+      "source": "from-evernote/Amazon Job/2023-07-31-using-javascript-on-my-laptop-uss-ganges.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Job Details",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or technical instruction (a command to start a Python web server) rather than a factoid representing a distinct entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Job Details"
+    },
+    {
+      "pass": 2,
+      "fact_id": "f5979773-2825-4da0-96e0-d6686513ae14",
+      "title": "Tinder app features and problems to solve",
+      "source": "from-evernote/Amazon Job/2022-05-30-tinder.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Job Details",
+        "confidence": 0.95,
+        "reason": "This is a list of app features and requirements for a hypothetical design exercise, not a factoid itself; it belongs as content under the Amazon Job Details parent."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Job Details"
+    },
+    {
+      "pass": 2,
+      "fact_id": "dd8267de-bbbc-40a3-bfe2-af1a3b34388e",
+      "title": "Leadership skills",
+      "source": "from-evernote/Amazon Job/2024-03-11-amazon-eng-mgr-questions-with-answers.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Job Details",
+        "confidence": 0.95,
+        "reason": "This is an interview question/prompt about leadership skills from an Amazon interview prep document, not a factoid about a thing itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Job Details"
+    },
+    {
+      "pass": 2,
+      "fact_id": "d4d3222a-a7c4-4025-bfc2-a5a5c5a6816d",
+      "title": "Walmart Payment System and Glass Project",
+      "source": "from-evernote/Amazon Job/2022-06-05-umut-isik-tpm-core.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Event",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This describes a specific project at Walmart with a bounded scope (team structure, system design), making it an Event rather than an ongoing Concept or Product."
+      },
+      "applied": true,
+      "note": "assigned Event"
+    },
+    {
+      "pass": 2,
+      "fact_id": "2f57ab95-84af-4501-909c-a31049dbb5ff",
+      "title": "Leadership Principles and Hiring Manager",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Prep Calls with Jer and Bryn",
+        "confidence": 0.95,
+        "reason": "This is a set of interview preparation notes and talking points rather than a factoid itself; it belongs as content within the existing parent node about prep calls."
+      },
+      "applied": true,
+      "note": "demoted → child of Prep Calls with Jer and Bryn"
+    },
+    {
+      "pass": 2,
+      "fact_id": "5b1d3391-4d98-4b7e-af1f-877ae9f03d96",
+      "title": "Amazon's Hiring Process",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": "Concept",
+        "parent_hint": null,
+        "confidence": 0.85,
+        "reason": "This is a note about Amazon's hiring process and practices (with mentions of manager structure and recruitment approaches), which is an abstract process/methodology rather than a specific event, person, or organization."
+      },
+      "applied": true,
+      "note": "assigned Concept"
+    },
+    {
+      "pass": 2,
+      "fact_id": "4487405f-1b11-47fd-9221-29331d772b4d",
+      "title": "Amazon's Hiring Process",
+      "source": "from-evernote/Amazon Job/2022-06-24-prep-calls-from-jer-and-bryn.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Dushara Paul",
+        "confidence": 0.95,
+        "reason": "This is a collection of notes about Amazon's hiring process and Dushara Paul's role, not a factoid itself; the content should be attached to the existing 'Dushara Paul' person node."
+      },
+      "applied": true,
+      "note": "demoted → child of Dushara Paul"
+    },
+    {
+      "pass": 2,
+      "fact_id": "fcfa2992-a541-4abe-bd80-f7f793e7ac35",
+      "title": "ad performance SQL query",
+      "source": "from-evernote/bizlog/2018-08-15-sql-to-see-ad-performance.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a SQL query code snippet used to analyze ad performance data, which is an implementation/technical artifact rather than a trackable factoid about a real entity."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "c2c79f90-9e66-43ee-b203-f20fba397c34",
+      "title": "SEO articles for helping elderly parents",
+      "source": "from-evernote/bizlog/2018-08-09-helping-senior-parents-seo-articles.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a curated collection of reference links and keywords for research purposes, not a factoid representing a thing worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "6b93e03b-fafb-4262-9bd3-b93863112807",
+      "title": "Create Facebook Page",
+      "source": "from-evernote/bizlog/2018-07-28-next.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Vineel Shah",
+        "confidence": 0.95,
+        "reason": "This is a task or action item ('should create'), not a factoid representing a real entity or account that exists."
+      },
+      "applied": true,
+      "note": "demoted → child of Vineel Shah"
+    },
+    {
+      "pass": 2,
+      "fact_id": "58fcc7af-6574-408a-9fb3-9e820ef9dd89",
+      "title": "Architecture Assessment",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a technical assessment or design note about a technology stack choice, not a first-class factoid worthy of independent tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "da1cc5df-6a49-4db2-927c-d50a38d0f113",
+      "title": "Updated-note path is incomplete",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or technical recommendation about a specific code function, not a factoid about something in Vineel's personal memory graph."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a1f88937-ea5a-4cc1-930b-60da058694b7",
+      "title": "Short term memory mechanism is TBD",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note discussing technical design options for a memory system feature, not a factoid worth tracking as a first-class entity in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a6eda64d-6e8e-49de-8ad9-78beb23cc33c",
+      "title": "Collapse ingest endpoints",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing a code refactoring task for an API endpoint, not a factoid representing a real entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "82178f93-8539-4329-9a7f-c20256debc2e",
+      "title": "Worker section is blank",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note about job type definitions for a memory server system, not a factoid about a real-world entity."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "42e5f6eb-9cf9-4eca-86c7-a3d8a51a3fa1",
+      "title": "Keyword extraction LLM call may not be needed",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design consideration about optimizing a system component, not a first-class factoid to track."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "5494ba19-ecef-41d5-9278-8b924ee2e19c",
+      "title": "`initial_facts` query is undefined",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design question about how to structure a memory system query, not a factoid representing a real entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "7c599ff3-3f59-45f1-9c6a-8f06f75bc4ae",
+      "title": "Missing `update_fact` endpoint",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or feature request documenting a missing API endpoint, not a factoid representing a real-world entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "e067a61e-e475-4f3e-838d-5502a962a58a",
+      "title": "Watcher behavior",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing technical behavior of a system component, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a2028e6c-8c57-415a-a591-f27a30dd1055",
+      "title": "Worker behavior",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing technical architecture and configuration details of Graphile Worker, not a factoid itself—it belongs as content under a parent project or system."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "72824626-4f16-46fc-982c-38947d66d888",
+      "title": "Suggested Facts Table Schema",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server-review.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a database schema definition/implementation note, not a factoid about something in Vineel's life."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "e2a5865e-0b27-4f1e-9890-3f7fdef57dd6",
+      "title": "Tech Stack",
+      "source": "inbox/accordli/willow/2026-04-05-memory-server.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a technical implementation detail or specification for a project, not a first-class factoid worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a4bef1f0-b1fd-4a55-bb27-9364cd6bde9c",
+      "title": "Contract document process",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or technical specification describing a workflow process, not a first-class factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "fd4fe426-5339-4bc5-919e-203933717926",
+      "title": "Build now: Upload dialog wizard and text extraction",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a development task/todo list describing implementation work, not a factoid describing something itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "8db2c19f-6fcb-4d16-bcff-639f7a44e4a1",
+      "title": "Build later: Paragraph map and HTML generation",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or development task about future work on Accordli, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "4b99d465-bf3b-4711-b269-9a68b6f139a1",
+      "title": "Sample issue from db",
+      "source": "inbox/accordli/ideas/2026-02-06-saving-files.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a sample data record or documentation snippet showing database schema/structure, not a factoid worth tracking as a first-class entity in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "40c52936-f52a-411d-92a1-16d86c625f83",
+      "title": "Update project documentation",
+      "source": "inbox/accordli/prompts/2026-02-17-update-docs.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation task/todo describing a documentation update workflow, not a factoid representing a real entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a08e1fea-d957-453b-a729-0bcc987e0fae",
+      "title": "Lessons learned from using CLAUDE",
+      "source": "inbox/accordli/prompts/2026-02-17-update-docs.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a lesson or insight extracted from a work session, not a factoid representing a distinct entity—it's an implementation note or learning reflection that should be nested under a project or experiment entry rather than tracked as a top-level factoid."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "88b11b35-c865-4e84-88a4-14914873f6b8",
+      "title": "Categorize Vineelernotes",
+      "source": "inbox/accordli/prompts/2026-01-30-categorize-vineelernotes.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a prompt or request describing a task to be performed, not a factoid or entity worth tracking in a personal memory graph."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "40c6d822-b82a-467f-9d65-08225548518d",
+      "title": "Edit Process",
+      "source": "inbox/accordli/docx-evolver/2026-03-02-thinking-at-the-library.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing technical design details for handling overlapping edits in a document evolution system, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "f3277a5b-8481-440e-af5e-e263efbca83a",
+      "title": "Qjob and Matter Project Planning",
+      "source": "inbox/accordli/todo/2026-02-04-more-thinking.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note discussing database schema design decisions (AgentRun vs Qjob table naming) rather than a trackable factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "8a2b1aec-38a2-450f-8574-3774f5c0f93b",
+      "title": "Redline Text Handling",
+      "source": "inbox/accordli/building-accordli/2026-02-18-redline-text.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an architectural design discussion and implementation note about a feature being built for Accordli, not a factoid entity itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "b9601324-f0c2-49c0-ac68-e8bb661ee3c7",
+      "title": "Admin Observation of Prompting",
+      "source": "inbox/accordli/building-accordli/2026-02-13-admin-observation-of-prompting.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design specification for a feature (Admin Footer on the Matters page), not a standalone factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "172e187f-516a-4556-96ec-2cb198dd8d9d",
+      "title": "Column Details for Q Observer",
+      "source": "inbox/accordli/building-accordli/2026-02-13-admin-observation-of-prompting.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a schema/implementation detail documenting database column specifications, not a standalone factoid worthy of tracking in a memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "86b52adc-47f4-4c59-bedb-7670d05631c3",
+      "title": "Word Export Feature Task",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a implementation/feature specification task describing how a software feature should work, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "19ff21bb-8f41-46a3-9fd5-081c06ebe8e9",
+      "title": "Bug in Exporting Staged Edits",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a bug report or implementation note describing a specific issue encountered while working with Accordli, not a factoid that should be tracked as a first-class entity in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "6ea40eaa-560b-4a3c-ac5d-182c7e97ece3",
+      "title": "Generalize Section Refs in Contracts",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a development task or implementation note about generalizing section reference handling in a contract processing feature, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "dde600e3-470a-4fd9-94e4-e32403f1b598",
+      "title": "Simulate Front End Pipeline Script",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a scratch task/todo describing a script to build, not a factoid itself; it belongs as a note under the Accordli project."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "39b38e22-8f08-4da9-8eec-63ae2aef0777",
+      "title": "Runtime Sanitize Switch",
+      "source": "inbox/accordli/building-accordli/2026-02-14-word-export-1.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a feature request or implementation note about a runtime flag for the sanitize function, not a factoid representing something in Vineel's personal memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "86e20ff2-bcad-443d-84f2-2f1f0853d883",
+      "title": "deploy script",
+      "source": "inbox/accordli/building-accordli/2026-03-25-deploy-and-reset-db.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a scratch task/implementation note describing steps to write a deployment script, not a factoid about something itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "e6482a8f-b895-4f04-94fe-51e09012ab6b",
+      "title": "Matter Page Sections",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a structural description of UI sections within a product interface, not a standalone factoid worthy of independent tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "bacedfc6-cc5f-4c56-a3b0-449556ea8e43",
+      "title": "Top Section Details",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing the structure and fields of a Matter page in Accordli, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "121bb7a3-44a0-490d-b0b8-7e9eef08c04b",
+      "title": "Documents Section",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a structural/organizational heading describing document sections within a project context, not a standalone factoid worthy of first-class tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "3a96d698-a61c-40c1-86a5-db2845d72276",
+      "title": "Staged Edits Section",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a descriptive heading/section title from a building document, not a standalone factoid—it describes the structure of a feature rather than an entity itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "91af2a66-c7af-41ac-8ebe-fdc8d8ff9fab",
+      "title": "Key Issues Section",
+      "source": "inbox/accordli/building-accordli/2026-02-02-first-thinkin-session.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a structural heading or implementation note describing the contents of a document section, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "1507a0e9-5e83-476f-bd4e-8f55c6f7a822",
+      "title": "address issue page plan",
+      "source": "inbox/accordli/building-accordli/2026-02-09-address-issue-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a design/implementation plan or specification document describing a feature to be built, not a factoid representing an entity itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "c09ee832-b338-4b28-b4d0-66c031bae4db",
+      "title": "generate alternatives dialog plan",
+      "source": "inbox/accordli/building-accordli/2026-02-09-address-issue-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a work plan or implementation spec for a feature, not a factoid itself—it describes what to build rather than something that exists."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "e1b1ea7d-ab85-4dcd-9caa-1f984ced4083",
+      "title": "create issueclause table",
+      "source": "inbox/accordli/building-accordli/2026-02-09-address-issue-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing database schema design, not a factoid to be tracked as a first-class entity in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "4f2c72b9-b389-4fa9-b2a6-84fd82606d4d",
+      "title": "qjob table structure",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a database schema definition/implementation note describing table structure, not a first-class factoid about something worth tracking in a memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "d11ffb67-87de-4958-aaea-0bb10c85d741",
+      "title": "Prompt template table",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing a database table schema for a project, not a factoid representing a real entity worth tracking in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "26df1858-541b-45b2-846a-75101de659ab",
+      "title": "Metrics to the job",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing a database schema change (adding a jsonb column), not a factoid representing something to track."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "31333052-7da9-4a6f-8744-3fc23e5f21dc",
+      "title": "Job status API",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation specification or technical requirement note for the Job Status API feature, not a first-class factoid about something worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "5e478af3-6c47-45ed-8abd-9d1bbac18e4a",
+      "title": "Multistep prompt jobs",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a scratch task or implementation note ('Someday -- add...') describing future work on a feature, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "89d0a2df-4567-4cbf-b5e0-69d4185450cc",
+      "title": "Admin UI",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a todo/feature request note rather than a factoid about something that exists or has occurred."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "3ff0d8f0-5fb7-4965-94d4-0b5af8e8378c",
+      "title": "Prompt template editor",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a future task or feature request ('Someday -- add...'), not a factoid representing an entity itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "b74b18e6-7301-4792-8cf8-9ba751c4726a",
+      "title": "Run viewer",
+      "source": "inbox/accordli/building-accordli/2026-02-07-river-and-qjob.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a development task or feature request ('add run viewer to show hydrated prompt and output') rather than a factoid describing something that exists; it belongs as a child of the Accordli project."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "88266a35-c7e4-4b1c-b084-22db5f3b579f",
+      "title": "building-accordli",
+      "source": "inbox/accordli/building-accordli/2026-03-04-building-accordli.md",
+      "verdict": {
+        "action": "assign",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.6,
+        "reason": "building-accordli is a named initiative/project that Vineel is working on, but 'Project' is not a valid type; it best fits as a Concept (an abstract collaborative/innovation endeavor) or could be demoted as a work-in-progress heading, but the content suggests it's a legitimate tracked entity worth preserving."
+      },
+      "applied": false,
+      "note": "skipped (assign, conf 0.60)"
+    },
+    {
+      "pass": 2,
+      "fact_id": "c230f417-81ae-46b9-b6f5-211afb602710",
+      "title": "Prerequisites for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a setup/installation instruction document or checklist, not a factoid about a real entity worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "1b5d663f-f17a-4299-99af-581688170ed1",
+      "title": "Python dependencies for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note or documentation fragment describing pip package dependencies for a project setup, not a first-class factoid worthy of independent tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "8adc1c4a-2285-48f3-9cb7-993b499263d7",
+      "title": "Check installed versions for terokNor",
+      "source": "inbox/accordli/devops/2026-03-27-teroknor-installs.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a shell command/devops task for checking installed versions, not a factoid representing a real entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "5bbc377b-bf1c-4fe6-ab6e-6815b8c0cf47",
+      "title": "Functionality",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Interview Preparation",
+        "confidence": 0.95,
+        "reason": "This is a numbered list of functional requirements for a system design question, not a factoid itself—it's implementation/design notes that belong under the interview preparation context."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Interview Preparation"
+    },
+    {
+      "pass": 2,
+      "fact_id": "78aeb2ad-d174-4681-9513-bdef549ad41f",
+      "title": "Client",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Interview Preparation",
+        "confidence": 0.95,
+        "reason": "This is a technical implementation note about file synchronization and locking issues from a system design interview preparation document, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Interview Preparation"
+    },
+    {
+      "pass": 2,
+      "fact_id": "77fb1e24-4673-4e6b-9d58-dd83f17354b7",
+      "title": "API Server",
+      "source": "from-evernote/Amazon Job/2022-05-16-amazon-interview-1-system-design-question.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Interview Preparation",
+        "confidence": 0.95,
+        "reason": "This is a design note or technical detail from an interview prep document, not a standalone factoid worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Interview Preparation"
+    },
+    {
+      "pass": 2,
+      "fact_id": "666dcb0f-e619-4925-a23b-29e7ec40215e",
+      "title": "Full list of NY State colleges",
+      "source": "inbox/accordli/2026-03-12-colleges-for-zeph.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Zeph Shah",
+        "confidence": 0.95,
+        "reason": "This is a reference list/document (titled 'Full list of NY State colleges') that appears to be supporting material for college research, likely related to Zeph Shah based on the filename, rather than a standalone factoid worthy of independent tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Zeph Shah"
+    },
+    {
+      "pass": 2,
+      "fact_id": "1f66eb0b-684c-44c1-beb0-38d0cd6810de",
+      "title": "Contract Analyst Section Headings",
+      "source": "inbox/accordli/ideas/2026-01-26-contract-analyst-section.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design document outlining UI section structure for a product feature, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "ad13159a-8f6f-4bb7-afec-d044d06f7e47",
+      "title": "Clarification on Tabs and B4",
+      "source": "inbox/accordli/ideas/2026-01-26-contract-analyst-section.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a discussion thread or clarification question about design concepts (tabs, UX, drafting package) rather than a factoid itself—it's a conversation artifact that should be nested under the Accordli project."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "7c531ffb-1369-4fd7-a1c4-076a831e99e4",
+      "title": "Staged Edits and Tools",
+      "source": "inbox/accordli/ideas/2026-01-26-contract-analyst-section.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Brad Simon",
+        "confidence": 0.95,
+        "reason": "This is a discussion/note about staged edits and tools from Brad's prototype, not a factoid itself—it's meta-documentation of a feature discussion."
+      },
+      "applied": true,
+      "note": "demoted → child of Brad Simon"
+    },
+    {
+      "pass": 2,
+      "fact_id": "2571d130-02d1-4570-81b5-fc4146290b50",
+      "title": "redline typescript function",
+      "source": "inbox/accordli/ideas/2026-02-01-redline-typescript-function.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is implementation code/a code snippet, not a factoid itself—it's a technical artifact documenting a function rather than a first-class entity worth tracking in a memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "dbfe2f79-1dfc-449b-8e20-85c1342a6d47",
+      "title": "Analysis Sections and Artifacts",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a feature description or implementation note about UI components in a product, not a factoid representing a distinct entity worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "d6e361cf-b721-4ba7-8012-3dcdadacfc13",
+      "title": "Performance Analysis Tools",
+      "source": "inbox/accordli/ideas/2026-01-25-accordli-workbench.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a description of features/tools within a product documentation, not a factoid itself—it's a section heading or implementation note from a design document about Accordli's workbench."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "453634e8-e050-4009-a46b-9f57818d0d56",
+      "title": "split window command",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a development task or feature request about kitty terminal window management, not a factoid itself—it belongs as context under the Accordli project."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "df06ee65-4bdc-449c-9f1d-8d7ffb8d80da",
+      "title": "api pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a configuration note describing a terminal pane setup for a development environment, not a factoid about a thing worth tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "0f2a3d0f-418e-4b65-a1ba-17b781fe5973",
+      "title": "worker pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a shell/terminal configuration note describing how to initialize a worker pane, not a factoid itself—it's implementation documentation that should be nested under a parent factoid like Accordli."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "54b2e175-317c-4de8-b90a-5b45ad445f16",
+      "title": "fe dev pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a shell/terminal configuration snippet describing how to initialize a development environment, not a factoid itself—it's an implementation note that should be demoted under the Accordli organization."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "bd221b47-e243-4e3b-b4b4-c42ccb9c4108",
+      "title": "commands pane",
+      "source": "inbox/accordli/prompts/2026-02-08-kitty-claudio.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a configuration note describing a terminal pane setup, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "39a024fe-d1cf-422e-8968-da7bbaa725a6",
+      "title": "Chaining Jobs",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a discussion/design question about implementation details of job chaining logic, not a factoid to track as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "e0074537-c83e-4c73-8fc7-97bbef7cf1be",
+      "title": "Separate Worker File",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design decision about code architecture, not a first-class factoid worthy of independent tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a8703782-d36a-40b2-80dc-570d85e4a1e4",
+      "title": "Output Parsing",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or technical discussion about code parsing logic, not a first-class factoid worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "f711f7d0-db79-44b4-9149-5fc81bdb75a2",
+      "title": "Prompt Building",
+      "source": "inbox/accordli/building-accordli/2026-02-08-analyst.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or design discussion fragment about prompt-building logic, not a factoid itself."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "55cc1692-04f6-4b62-8f40-938d66ea82b4",
+      "title": "Issue and Staged Alternatives",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Brad Simon",
+        "confidence": 0.95,
+        "reason": "This is a document heading/section title describing a layout framework rather than a factoid itself; it belongs as content under Brad Simon's existing factoid."
+      },
+      "applied": true,
+      "note": "demoted → child of Brad Simon"
+    },
+    {
+      "pass": 2,
+      "fact_id": "b69984e4-f4da-4fd1-9e88-6e382ef36b45",
+      "title": "Staged Alternatives",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or documentation fragment describing contract liability language alternatives for a tool, not a standalone factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "b178606c-58ff-45d9-9187-735be30f97ba",
+      "title": "Generate Clause Text",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a feature specification or implementation note describing how a UI component should work, not a factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "937704e0-a945-4697-be4d-098950153de2",
+      "title": "Compare Button",
+      "source": "inbox/accordli/building-accordli/2026-01-30-alternatives-page.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a feature specification or implementation note describing UI functionality for the Accordli product, not a factoid to track independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "12b30ba1-46c7-4c18-a07d-c1499bfb44e3",
+      "title": "Staging Server Logs",
+      "source": "inbox/accordli/building-accordli/2026-02-24-staging-server.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing how to access logs on a staging server, not a factoid representing a first-class entity worth tracking in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "43c15275-a1a4-472e-9218-9f2ed758d677",
+      "title": "Starting and Stopping Processes",
+      "source": "inbox/accordli/building-accordli/2026-02-24-staging-server.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing operational procedures for managing a staging server, not a distinct factoid that should exist as a first-class entity in the memory graph."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "373d8c8e-877b-4edb-b83d-632ae5cf03c4",
+      "title": "Manually Making Users",
+      "source": "inbox/accordli/building-accordli/2026-02-24-staging-server.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note or technical instructions fragment describing how to perform a task, not a first-class factoid worth tracking independently."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "63dc3230-0b12-4034-93c2-d9bda35c85f1",
+      "title": "Version Comparison",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is a feature specification/implementation detail from a product spec document, not a standalone factoid worthy of first-class tracking."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "c226c991-4d58-445c-82e9-99a0f1183932",
+      "title": "Architecture",
+      "source": "inbox/accordli/features/2026-02-19-product-spec.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Accordli",
+        "confidence": 0.95,
+        "reason": "This is an implementation note documenting technical architecture details from a product spec, not a standalone factoid to be tracked as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted → child of Accordli"
+    },
+    {
+      "pass": 2,
+      "fact_id": "8e7546cc-c94c-41e2-acf2-2b6c483b342a",
+      "title": "postgresql on vinapps",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This appears to be a search query or discussion topic about PostgreSQL configuration on VinApps, not a factoid representing a distinct entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "dd5f6a8a-b2ec-4426-83d2-8b6f0c6f461b",
+      "title": "RocksDB and PostgreSQL",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a search query or discussion topic about integrating RocksDB with PostgreSQL, not a factoid representing a concrete entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "bdfce899-4f70-4911-9595-367779965840",
+      "title": "PostgreSQL for configs and API keys",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a technical implementation note describing how PostgreSQL is used, not a first-class factoid worth tracking as an entity."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "acd45c4f-e0a5-4937-abf6-f550c534a08e",
+      "title": "Fast paging with MongoDB",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a search query or discussion topic about a technical comparison, not a factoid representing a real entity worth tracking."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "de897b2c-dc69-4628-b3ec-906e74590bc8",
+      "title": "PostgreSQL in Rails server",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is a discussion topic or search query about using PostgreSQL with Rails, not a factoid representing a specific entity worth tracking in a memory graph."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "783c425a-7998-49f7-996c-3b92837b0f4b",
+      "title": "Product Spec Database",
+      "source": "searches/2026-03-27T17-17-13-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": null,
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing database setup details rather than a standalone factoid worth tracking as a first-class entity."
+      },
+      "applied": true,
+      "note": "demoted"
+    },
+    {
+      "pass": 2,
+      "fact_id": "e9fc97c0-7ac7-4492-8368-74d5edc6ffa9",
+      "title": "API Gateway URLs",
+      "source": "from-evernote/Amazon Job/2023-01-19-chime-sdk-workshop.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Job Details",
+        "confidence": 0.95,
+        "reason": "This is a technical implementation detail (a specific API endpoint URL) that belongs as content under the Amazon Job context, not a standalone factoid."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Job Details"
+    },
+    {
+      "pass": 2,
+      "fact_id": "fd1e8e70-aa0d-4541-b24a-dcd2735648ef",
+      "title": "Lambda Function Details",
+      "source": "from-evernote/Amazon Job/2023-01-19-chime-sdk-workshop.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Amazon Job Details",
+        "confidence": 0.95,
+        "reason": "This is an implementation note describing technical details of a Lambda function, not a factoid itself, and logically belongs under the Amazon Job Details parent."
+      },
+      "applied": true,
+      "note": "demoted → child of Amazon Job Details"
+    },
+    {
+      "pass": 2,
+      "fact_id": "6672b7de-7ecc-485c-9314-7c14793ce3c8",
+      "title": "HBO in a Product Context",
+      "source": "searches/2026-02-10T19-52-00-search.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "HBO in General",
+        "confidence": 0.95,
+        "reason": "This is a meta-note about HBO being mentioned in a product context, not a factoid itself; the actual factoid about HBO should be tracked under the existing 'HBO in General' organization entry."
+      },
+      "applied": true,
+      "note": "demoted → child of HBO in General"
+    },
+    {
+      "pass": 2,
+      "fact_id": "a0d08145-7d87-4393-844d-7b0d0d80eda7",
+      "title": "Memory features & Nate's approach",
+      "source": "inbox/accordli/willow/2026-04-08-working-on-a-new-memory.md",
+      "verdict": {
+        "action": "demote",
+        "factoid_type": null,
+        "parent_hint": "Nate from Nate's Substack",
+        "confidence": 0.95,
+        "reason": "This is a working note or discussion about feature development approaches, not a standalone factoid—it describes a technique inspired by someone else's method rather than being an entity itself."
+      },
+      "applied": true,
+      "note": "demoted"
+    }
+  ]
+}

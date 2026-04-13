@@ -19,6 +19,7 @@
     "memory:reparent": "bun run memory/scripts/reparent-fragments.ts",
     "memory:migrate-fact-merge": "psql -d willow -f db/migrations/003-fact-merge.sql",
     "memory:seed-farley": "bun run memory/scripts/seed-farley-from-claude-md.ts",
+    "memory:assign-types": "bun run memory/scripts/assign-factoid-types.ts",
     "mcp:memory": "bun run --silent mcp/memory-mcp/server.ts",
     "mcp:triage": "bun run --silent mcp/triage-mcp/server.ts",
     "mcp:interests": "bun run --silent mcp/interests-mcp/server.ts",

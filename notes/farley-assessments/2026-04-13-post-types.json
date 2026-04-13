@@ -1,0 +1,119 @@
+{
+  "label": "2026-04-13-post-types",
+  "timestamp": "2026-04-13T16:28:51.748Z",
+  "totals": {
+    "facts_active": 1444,
+    "factoids_active": 444,
+    "factoids_human_verified": 20,
+    "relationships": 0,
+    "entity_addresses": 94
+  },
+  "factoid_type_distribution": {
+    "Person": 198,
+    "Concept": 74,
+    "Account": 70,
+    "Product": 35,
+    "Event": 32,
+    "Organization": 30,
+    "Place": 2,
+    "Unknown": 2,
+    "(null)": 1
+  },
+  "person_quality": {
+    "total": 198,
+    "junk_in_person": 10,
+    "junk_examples": [
+      {
+        "fact_id": "e9edbd67-809f-4e0b-8552-7cc492ade06f",
+        "title": "Metrics, KPIs, and SLAs",
+        "pattern": "center|stadium|arena|theater|theatre|venue|restaurant|bar\\b|cafe"
+      },
+      {
+        "fact_id": "5d60ba5f-f83b-45bc-83e7-87f17446791f",
+        "title": "Apple Call",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "3cb14f9c-ece2-40d0-afe6-5e7caf292229",
+        "title": "openai_account",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "5a0bf2d9-2b8f-4e97-9d84-ca9486bb615b",
+        "title": "My IDs",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "dd1ee1c6-f639-46ef-a357-cf2fa4a25822",
+        "title": "localhost WordPress blog",
+        "pattern": "login|password|api[\\s_-]?key|access[\\s_-]?token|credentials?"
+      },
+      {
+        "fact_id": "95508326-6a82-4802-8a85-9e4522b0fb9c",
+        "title": "Refine the New Version feature",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "21cfd979-d3ca-417b-b584-2e08ded6a110",
+        "title": "Thurshara's role and team structure",
+        "pattern": "center|stadium|arena|theater|theatre|venue|restaurant|bar\\b|cafe"
+      },
+      {
+        "fact_id": "b0c94844-7482-47d2-9873-5327da593c03",
+        "title": "Vineel Personal Interest Agent",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      },
+      {
+        "fact_id": "c4c9dc33-2e30-4266-a2c9-01ad0a25fd09",
+        "title": "Prep Calls with Jer and Bryn",
+        "pattern": "center|stadium|arena|theater|theatre|venue|restaurant|bar\\b|cafe"
+      },
+      {
+        "fact_id": "295ac731-b673-4dfe-90e5-6f7dd13d29db",
+        "title": "Interview Preparation Tips",
+        "pattern": "playbook|how[\\s_-]?to|setup|configuration|install|cheatsheet"
+      }
+    ],
+    "short_content_lt_20": 3,
+    "no_address_and_short": 3,
+    "orphan_no_children": 137
+  },
+  "duplication": {
+    "exact_title_duplicate_groups": 2,
+    "exact_title_duplicate_factoids": 4,
+    "worst_offenders": [
+      {
+        "title": "amazon interview",
+        "factoid_type": "Event",
+        "count": 2
+      },
+      {
+        "title": "leadership principles",
+        "factoid_type": "Concept",
+        "count": 2
+      }
+    ]
+  },
+  "fragmentation": {
+    "possessive_prefix_clusters": 2,
+    "orphaned_fragment_facts": 0,
+    "worst_prefixes": [
+      {
+        "prefix": "vineel",
+        "fragments": 13,
+        "parent_exists": true
+      },
+      {
+        "prefix": "brad",
+        "fragments": 3,
+        "parent_exists": true
+      }
+    ]
+  },
+  "address_graph": {
+    "factoids_with_addresses": 81,
+    "addresses_per_factoid_avg": 1.16,
+    "display_name_collisions": 1
+  },
+  "merges_recorded": 64
+}
