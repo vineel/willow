@@ -22,3 +22,7 @@ bun.lockb
 
 # TypeScript
 *.tsbuildinfo
+
+# Runtime state files (memory server)
+memory/could-not-ingest.txt
+memory/retry-later.txt
