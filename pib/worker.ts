@@ -14,9 +14,10 @@ import { sql } from "./config";
 import { runPipeline } from "./pipeline";
 import { sendDigest } from "./digest";
 import { createLogger } from "./logger";
+import { writeVersionInfo } from "../lib/version";
 
 const log = createLogger("pib.worker");
-const FOLDERS_TO_SYNC = ["inbox", "for-willow", "not-for-willow"];
+const FOLDERS_TO_SYNC = ["inbox", "for-willow", "not-for-willow", "Ai Buzz"];
 
 const tasks: TaskList = {
   async pib_ingest(_payload, _helpers) {
@@ -62,6 +63,7 @@ const crontab = parseCronItems([
 
 async function main() {
   log.runStart("Worker starting");
+  await writeVersionInfo("worker");
 
   try {
     await sql`SELECT 1`;

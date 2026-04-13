@@ -8,11 +8,13 @@ import { health } from "./routes/health";
 import { createIngestRoutes } from "./routes/ingest";
 import { search } from "./routes/search";
 import { createFactsRoutes } from "./routes/facts";
+import { writeVersionInfo } from "../lib/version";
 
 async function main() {
   console.log("[memory] Starting Willow Memory Server...");
   console.log(`[memory] NOTES_ROOT: ${config.notesRoot}`);
   console.log(`[memory] LM Studio: ${config.lmstudio.baseUrl}`);
+  await writeVersionInfo("memory");
 
   // 1. Verify DB connection
   try {
