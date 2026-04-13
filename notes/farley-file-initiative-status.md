@@ -84,11 +84,11 @@ Three scripts, all `--dry-run` by default:
 
 Each: dry-run default, prints proposed changes, `--apply` writes inside a transaction.
 
-### Phase 4 — Run + retro ⏳ IN PROGRESS (2026-04-13)
+### Phase 4 — Run + retro ✅ DONE (2026-04-13)
 
 - Scripts run against live DB ✅
 - Results reviewed ✅ (see Phase 3 Results table above)
-- `notes/factoid-cleanup-retro.md` — TODO: threshold calibration, false-positive rate, false-negative discoveries, LLM judge agreement rate. Feeds the recurring maintenance job config.
+- `notes/factoid-cleanup-retro.md` written ✅ — calibration notes, LLM judge verdict distribution, false-positive risks, maintenance-worker plan.
 
 ### Phase 5 — Seed + unblock bootstrap ⏳ PENDING
 
