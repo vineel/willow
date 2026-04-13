@@ -36,6 +36,7 @@ import type { JMAPEmail, JMAPSession } from "../jmap/types";
 import { normalize } from "../normalizer";
 import { triage } from "../triage/engine";
 import { loadRules } from "../triage/rules";
+import { generateEmbedding } from "../../memory/lmstudio/client";
 
 // ============================================================================
 // Args
@@ -305,6 +306,289 @@ async function prefilter(
 }
 
 // ============================================================================
+// Extraction (Sonnet)
+// ============================================================================
+
+const SONNET_MODEL = "claude-sonnet-4-6";
+const OPUS_MODEL = "claude-opus-4-6";
+
+const EXTRACTION_SYSTEM = `You are extracting durable memory facts from
+Vineel Shah's historical email for his personal memory graph.
+
+Vineel's circle: wife Stephanie Sokaris, son Zeph (Zephyros), child Ele
+(Elektra, they/them), parents Vinod and Neela, brother Nigam and his
+family (Heidi, Arjun, Priya), Sokaris in-laws in Albany (Mary, Stratton,
+Roxanne, Ryleigh, Zoe, James, Sandra), Accordli co-founder Brad Simon.
+Ongoing projects: Accordli (AI contracting workbench for lawyers) and
+Willow (this memory system).
+
+For the email shown, produce atomic facts worth remembering a year from
+now. Each fact is a short sentence about one distinct piece of
+information. Phrase time-sensitive content relative to the email date
+("Zeph was accepted to X in April 2026"), not as present tense.
+
+Only emit facts about:
+- People in Vineel's circle (biographical details, roles, contact info,
+  decisions, plans, health)
+- Accordli / Willow project context (design decisions, milestones,
+  partners, features)
+- Concrete commitments, appointments, decisions Vineel or his family
+  have actually made
+- Active professional relationships — someone who's actively engaged
+  with Vineel on real work
+
+DO NOT emit facts about:
+- 2FA codes, order numbers, tracking numbers, verification codes
+- Marketing content, newsletter editorials, promotional material
+- Cold outreach from unknown senders even if it sounds real
+- Things the sender speculated might happen but weren't committed
+- Dates of events Vineel didn't actually attend or RSVP to
+
+Each fact has:
+- title: short name, 3-8 words
+- content: one or two complete sentences with date context
+- is_factoid: true if this fact describes a distinct real-world entity
+  (a Person, Place, Organization, Event, Product, Account) that might
+  accumulate child facts later. false for individual statements about
+  an existing entity.
+- factoid_type: one of Person, Place, Organization, Event, Concept,
+  Product, Account, Unknown — or null if is_factoid is false
+- keywords: 3-6 search terms
+
+If the email has no such facts, return an empty facts array.
+
+Respond with JSON only:
+{"facts": [{"title": "...", "content": "...", "is_factoid": true|false, "factoid_type": "..."|null, "keywords": ["...", ...]}]}`;
+
+interface ExtractedFact {
+  title: string;
+  content: string;
+  is_factoid: boolean;
+  factoid_type: string | null;
+  keywords: string[];
+}
+
+async function extractFacts(
+  email: JMAPEmail,
+  bodyText: string | undefined,
+  model: "sonnet" | "opus",
+): Promise<ExtractedFact[]> {
+  const apiKey = process.env.ANTHRO_API_KEY;
+  if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
+
+  const modelId = model === "opus" ? OPUS_MODEL : SONNET_MODEL;
+  const userPrompt = emailToPrompt(email, bodyText);
+
+  const res = await fetch(ANTHROPIC_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: modelId,
+      max_tokens: 1024,
+      system: [
+        {
+          type: "text",
+          text: EXTRACTION_SYSTEM,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      messages: [{ role: "user", content: userPrompt }],
+    }),
+    signal: AbortSignal.timeout(120_000),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`${modelId} ${res.status}: ${body}`);
+  }
+  const data = (await res.json()) as { content: { type: string; text: string }[] };
+  const text = data.content.find((c) => c.type === "text")?.text ?? "";
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/, "$1")
+    .trim();
+
+  try {
+    const parsed = JSON.parse(cleaned) as { facts?: unknown };
+    if (!parsed.facts || !Array.isArray(parsed.facts)) return [];
+    const valid = (["Person", "Place", "Organization", "Event", "Concept", "Product", "Account", "Unknown"] as const);
+    const out: ExtractedFact[] = [];
+    for (const f of parsed.facts) {
+      if (!f || typeof f !== "object") continue;
+      const r = f as Record<string, unknown>;
+      const title = typeof r.title === "string" ? r.title.trim() : "";
+      const content = typeof r.content === "string" ? r.content.trim() : "";
+      if (!title || !content) continue;
+      const is_factoid = r.is_factoid === true;
+      const factoid_type =
+        typeof r.factoid_type === "string" && (valid as readonly string[]).includes(r.factoid_type)
+          ? r.factoid_type
+          : null;
+      const keywords = Array.isArray(r.keywords)
+        ? r.keywords.filter((k): k is string => typeof k === "string")
+        : [];
+      out.push({ title, content, is_factoid, factoid_type, keywords });
+    }
+    return out;
+  } catch {
+    console.log(`[extract] parse failed on ${email.id}: ${cleaned.slice(0, 100)}`);
+    return [];
+  }
+}
+
+// ============================================================================
+// Memory write path (thin bootstrap-specific helper)
+// ============================================================================
+
+// Dedupe threshold for memory_search: if an existing fact's cosine
+// similarity to a candidate is >= this, we skip the insert.
+const SEMANTIC_DUP_THRESHOLD = 0.88;
+
+async function semanticDuplicateExists(
+  embedding: number[],
+): Promise<boolean> {
+  const lit = `[${embedding.join(",")}]`;
+  const rows = await sql`
+    SELECT 1 - (embedding <=> ${lit}::vector) AS score
+    FROM app.fact
+    WHERE is_active = true AND embedding IS NOT NULL
+    ORDER BY embedding <=> ${lit}::vector
+    LIMIT 1
+  `;
+  if (rows.length === 0) return false;
+  return (rows[0] as { score: number }).score >= SEMANTIC_DUP_THRESHOLD;
+}
+
+async function saveSourceNoteForEmail(
+  email: JMAPEmail,
+  bodyText: string | undefined,
+  summary: string | null,
+): Promise<string> {
+  const from = email.from?.[0];
+  const fromStr = from
+    ? from.name
+      ? `${from.name} <${from.email}>`
+      : from.email
+    : "unknown";
+  const rawText = `From: ${fromStr}
+Subject: ${email.subject ?? "(no subject)"}
+Date: ${email.receivedAt}
+
+${bodyText ?? ""}`;
+
+  const metadata = {
+    from: fromStr,
+    from_address: from?.email ?? null,
+    subject: email.subject ?? null,
+    date: email.receivedAt,
+    thread_id: email.threadId,
+    mailbox_ids: email.mailboxIds,
+    bootstrap: true,
+  };
+
+  const [row] = await sql<Array<{ source_note_id: string }>>`
+    INSERT INTO app.source_note
+      (source_type, source_ref, original_id, title, raw_text, summary,
+       extracted_by, metadata, received_at)
+    VALUES (
+      'email',
+      ${email.id},
+      ${email.id},
+      ${email.subject ?? "(no subject)"},
+      ${rawText},
+      ${summary},
+      'sonnet',
+      ${sql.json(metadata as unknown as Record<string, unknown>)},
+      ${email.receivedAt}
+    )
+    ON CONFLICT (source_type, source_ref) WHERE source_ref IS NOT NULL
+      DO UPDATE SET raw_text = EXCLUDED.raw_text
+    RETURNING source_note_id
+  `;
+  return row.source_note_id;
+}
+
+interface BootstrapWriteResult {
+  attempted: number;
+  written: number;
+  skipped_semantic: number;
+  skipped_title: number;
+}
+
+async function bootstrapSaveFacts(
+  email: JMAPEmail,
+  bodyText: string | undefined,
+  facts: ExtractedFact[],
+): Promise<BootstrapWriteResult> {
+  const result: BootstrapWriteResult = {
+    attempted: facts.length,
+    written: 0,
+    skipped_semantic: 0,
+    skipped_title: 0,
+  };
+  if (facts.length === 0) return result;
+
+  // Single source_note per email, shared across all facts.
+  const summary = facts[0]?.content ?? null;
+  const sourceNoteId = await saveSourceNoteForEmail(email, bodyText, summary);
+
+  for (let i = 0; i < facts.length; i++) {
+    const fact = facts[i];
+
+    // Embed content for semantic dedupe + vector search later.
+    const { embedding } = await generateEmbedding(
+      `${fact.title}\n${fact.content}`,
+    );
+    const vecLit = `[${embedding.join(",")}]`;
+
+    // Semantic dedupe — if a near-duplicate exists, skip.
+    if (await semanticDuplicateExists(embedding)) {
+      result.skipped_semantic++;
+      continue;
+    }
+
+    // On-insert exact-title dedupe (mirror of memory/extractor/extract.ts).
+    let is_factoid = fact.is_factoid;
+    let factoid_type: string | null = fact.factoid_type;
+    let parent_factoid_id: string | null = null;
+    if (fact.is_factoid && fact.factoid_type) {
+      const [existing] = await sql`
+        SELECT fact_id FROM app.fact
+        WHERE is_active = true AND is_factoid = true
+          AND factoid_type = ${fact.factoid_type}
+          AND lower(btrim(title)) = ${fact.title.toLowerCase().trim()}
+        LIMIT 1
+      `;
+      if (existing) {
+        is_factoid = false;
+        factoid_type = null;
+        parent_factoid_id = existing.fact_id;
+        result.skipped_title++;
+      }
+    }
+
+    await sql`
+      INSERT INTO app.fact (
+        source_note_id, source_ordinal, title, content, keywords,
+        embedding, memory_type, status, is_factoid, factoid_type,
+        parent_factoid_id, confidence, expires_type
+      ) VALUES (
+        ${sourceNoteId}, ${i + 1}, ${fact.title}, ${fact.content},
+        ${fact.keywords}, ${vecLit}::vector, 'long_term', 'clustered',
+        ${is_factoid}, ${factoid_type}, ${parent_factoid_id}, 0.7, 'never'
+      )
+    `;
+    result.written++;
+  }
+
+  return result;
+}
+
+// ============================================================================
 // Main
 // ============================================================================
 
@@ -373,7 +657,12 @@ async function main() {
     let survived = 0;
     let prefilterCalls = 0;
     let prefilterYes = 0;
+    let extractionCalls = 0;
+    let factsWritten = 0;
+    let factsSkippedSemantic = 0;
+    let factsSkippedTitle = 0;
     let costPrefilter = 0;
+    let costExtraction = 0;
     const yesExamples: Array<{ subject: string; from: string; reason: string }> = [];
 
     for (let i = 0; i < ids.length; i += PAGE) {
@@ -416,11 +705,13 @@ async function main() {
           await sql`UPDATE app.bootstrap_run SET status = 'budget_exceeded' WHERE run_id = ${runId}`;
           break;
         }
+        let pfWorth = false;
         try {
           const bodyText = event.bodyText;
           const pf = await prefilter(email, bodyText);
           prefilterCalls++;
           costPrefilter += estimateCost(1, 0, args.extractionModel).prefilter;
+          pfWorth = pf.worth;
           if (pf.worth) {
             prefilterYes++;
             if (yesExamples.length < 20) {
@@ -442,7 +733,34 @@ async function main() {
           console.log(`[prefilter] error on ${email.id}: ${msg}`);
         }
 
-        // Stage 2: extraction would happen here for prefilterYes emails.
+        if (!pfWorth) continue;
+        if (args.dryRun) continue;
+
+        // Stage 2: extraction + memory write.
+        if (extractionCalls >= args.maxExtraction) {
+          console.log(`[budget] extraction cap reached (${args.maxExtraction}) — continuing prefilter only`);
+          continue;
+        }
+        try {
+          const bodyText = event.bodyText;
+          const facts = await extractFacts(email, bodyText, args.extractionModel);
+          extractionCalls++;
+          costExtraction += estimateCost(0, 1, args.extractionModel).extraction;
+          if (facts.length === 0) {
+            if (args.verbose) console.log(`  EXTRACT  ${email.subject?.slice(0, 60) ?? ""}  (0 facts)`);
+            continue;
+          }
+          const write = await bootstrapSaveFacts(email, bodyText, facts);
+          factsWritten += write.written;
+          factsSkippedSemantic += write.skipped_semantic;
+          factsSkippedTitle += write.skipped_title;
+          console.log(
+            `  WROTE  ${email.subject?.slice(0, 50) ?? ""}  (${write.written}/${write.attempted}, sem-skip ${write.skipped_semantic}, title-snap ${write.skipped_title})`,
+          );
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.log(`[extract] error on ${email.id}: ${msg}`);
+        }
       }
 
       // Checkpoint after each page.
@@ -454,7 +772,10 @@ async function main() {
             emails_survived = ${survived},
             prefilter_calls = ${prefilterCalls},
             prefilter_yes = ${prefilterYes},
-            cost_prefilter = ${costPrefilter}
+            extraction_calls = ${extractionCalls},
+            facts_added = ${factsWritten},
+            cost_prefilter = ${costPrefilter},
+            cost_extraction = ${costExtraction}
         WHERE run_id = ${runId}
       `;
 
@@ -504,19 +825,23 @@ async function main() {
     console.log("");
 
     if (!args.dryRun) {
-      console.log(
-        "NOTE: extraction + memory writes are not yet implemented (stage 2).",
-      );
-      console.log(
-        "      re-run with --dry-run to suppress this notice.",
-      );
+      console.log("Extraction + writes:");
+      console.log(`  extraction calls:    ${extractionCalls}`);
+      console.log(`  facts written:       ${factsWritten}`);
+      console.log(`  skipped (semantic):  ${factsSkippedSemantic}`);
+      console.log(`  skipped (title):     ${factsSkippedTitle} (snapped to existing factoid as child)`);
+      console.log(`  actual extraction $: $${costExtraction.toFixed(3)}`);
+      console.log("");
     }
 
     await sql`
       UPDATE app.bootstrap_run
       SET status = 'completed',
           ended_at = now(),
-          cost_prefilter = ${est.prefilter}
+          cost_prefilter = ${costPrefilter},
+          cost_extraction = ${costExtraction},
+          extraction_calls = ${extractionCalls},
+          facts_added = ${factsWritten}
       WHERE run_id = ${runId}
     `;
   } catch (err) {
