@@ -1,6 +1,6 @@
 {
   "name": "willow",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "dev": "bun run --watch bridge/server.ts",
@@ -20,6 +20,10 @@
     "memory:migrate-fact-merge": "psql -d willow -f db/migrations/003-fact-merge.sql",
     "memory:seed-farley": "bun run memory/scripts/seed-farley-from-claude-md.ts",
     "memory:assign-types": "bun run memory/scripts/assign-factoid-types.ts",
+    "memory:brain-map": "bun run scripts/brain-map.ts",
+    "memory:person-cleanup-map": "bun run scripts/person-cleanup-map.ts",
+    "memory:reprocess-all": "bun run memory/scripts/reprocess-all.ts",
+    "memory:entity-linker": "bun run memory/scripts/entity-linker.ts",
     "mcp:memory": "bun run --silent mcp/memory-mcp/server.ts",
     "mcp:triage": "bun run --silent mcp/triage-mcp/server.ts",
     "mcp:interests": "bun run --silent mcp/interests-mcp/server.ts",
@@ -27,6 +31,9 @@
     "mcp:web": "bun run --silent mcp/web-mcp/server.ts",
     "mcp:pipeline": "bun run --silent mcp/pipeline-mcp/server.ts",
     "mcp:todo": "bun run --silent mcp/todo-mcp/server.ts",
+    "mcp:calendar": "bun run --silent mcp/calendar-mcp/server.ts",
+    "mcp:slack-channel": "bun run --silent mcp/slack-channel/server.ts",
+    "mcp:session": "bun run --silent mcp/session-mcp/server.ts",
     "pib:fetch": "bun run pib/fetch.ts",
     "pib:run": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/run-pipeline.ts",
     "pib:worker": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/worker.ts",
@@ -37,15 +44,24 @@
     "pib:search": "bun run pib/scripts/email-search.ts",
     "pib:migrate": "psql -d willow -f db/migrations/001-pib-tables.sql",
     "pib:bootstrap-memory": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/bootstrap-memory.ts",
-    "pib:bootstrap-migrate": "psql -d willow -f db/migrations/004-bootstrap-runs.sql"
+    "pib:bootstrap-migrate": "psql -d willow -f db/migrations/004-bootstrap-runs.sql",
+    "cal:sync": "bun run cal/scripts/cal-sync.ts",
+    "cal:extract": "bun run cal/scripts/cal-extract.ts",
+    "cal:status": "bun run cal/scripts/cal-status.ts",
+    "cal:migrate": "psql -d willow -f db/migrations/005-cal-tables.sql",
+    "cal:migrate:write": "psql -d willow -f db/migrations/006-cal-write-support.sql",
+    "pib:portfolio": "bun run pib/scripts/portfolio-report.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "@slack/bolt": "^4.7.0",
     "chokidar": "^4.0.0",
     "fastify": "^5.3.3",
     "graphile-worker": "^0.16.0",
     "hono": "^4.7.0",
-    "postgres": "^3.4.8"
+    "postgres": "^3.4.8",
+    "tsdav": "^2.1.8",
+    "yahoo-finance2": "^3.14.0"
   },
   "devDependencies": {
     "@types/bun": "^1.2.13"
