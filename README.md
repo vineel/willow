@@ -1,6 +1,6 @@
 # Willow
 
-Personal AI agent system. Second brain + email pipeline + scheduled agents.
+Personal AI agent system. Second brain + email pipeline + calendar integration + scheduled agents.
 
 Runs on a Mac Mini behind Tailscale. Uses PostgreSQL, Bun, LM Studio, and Claude Code.
 
@@ -43,6 +43,9 @@ security add-generic-password -s fastmail-token -a willow -w "YOUR_TOKEN"
 
 # Brave Search API key
 security add-generic-password -s brave-api-key -a willow -w "YOUR_KEY"
+
+# iCloud CalDAV app-specific password (generate at appleid.apple.com)
+security add-generic-password -a 'vineel@vineel.com' -s willow-icloud-caldav -w "YOUR_APP_PASSWORD"
 ```
 
 ### 4. Seed your inbox
@@ -70,9 +73,10 @@ NOTES_ROOT=/path/to/your/notes bun run memory
 bun run pib:worker
 ```
 
-The PIB worker runs two cron jobs:
+The PIB worker runs three cron jobs:
 - **pib_ingest** every 15 minutes: checks inbox + signal folders for new emails
-- **pib_digest** daily at 8am: sends a digest of all digest-triaged emails
+- **pib_digest** daily at 8am: sends a digest of all digest-triaged emails + calendar this week
+- **cal_sync** every 30 minutes: syncs iCloud Calendar via CalDAV, extracts todos and facts
 
 ## Runtime agent
 
@@ -110,6 +114,25 @@ Then talk to it naturally:
 | `bun run pib:digest:test -- <id> ...` | Send a test digest for specific fact IDs |
 | `bun run pib:migrate` | Run the PIB database migration |
 
+### Portfolio
+
+| Command | Description |
+|---|---|
+| `bun run pib:portfolio` | Fetch live quotes, value the portfolio, send a Mid-Day report to the willow folder |
+| `bun run pib:portfolio premarket` | Same, as Pre-Market report (no North Stars / Big Movers section) |
+| `bun run pib:portfolio postclose` | Same, as Post-Close report |
+
+The worker cron also runs this automatically on weekdays: 9:15 ET (pre-market), 12:30 ET (mid-day), 4:15 ET (post-close). Mid-day and post-close reports include a **North Stars** section (AAPL, NVDA always) and a **Big Movers** section (any held ticker with an absolute move >=2% vs. previous close).
+
+### Calendar
+
+| Command | Description |
+|---|---|
+| `bun run cal:sync` | Run a full calendar sync + extraction (manual trigger) |
+| `bun run cal:extract` | Re-run extraction on pending events |
+| `bun run cal:status` | Show synced calendars, extraction stats, upcoming events |
+| `bun run cal:migrate` | Run the calendar database migration |
+
 ### Memory
 
 | Command | Description |
@@ -132,6 +155,9 @@ These run as stdio processes, started automatically by Claude Code via `.mcp.jso
 | `willow-notify` | `send_notification`, `send_email` |
 | `willow-web` | `web_search`, `web_fetch` |
 | `willow-pipeline` | `pipeline_status`, `run_now`, `digest_preview`, `send_digest` |
+| `willow-todo` | `add_todo`, `list_todos`, `complete_todo`, `update_todo` |
+| `willow-calendar` | `get_calendars`, `list_events`, `search_events`, `create_event`, `update_event`, `delete_event`, `find_conflicts` |
+| `willow-session` | `restart_session` — clears Claude Code conversation context and reloads MCP server code by respawning the `willow-agent` tmux pane |
 
 ## LaunchAgents (auto-start & auto-restart)
 
@@ -234,15 +260,22 @@ willow/
     triage/             -- Rule engine
     scripts/            -- CLI scripts (run-pipeline, digest-preview, etc.)
     pipeline.ts         -- Core pipeline orchestrator
-    worker.ts           -- Graphile Worker cron runner
+    worker.ts           -- Graphile Worker cron runner (email + calendar)
     fetch.ts            -- Interactive CLI
     classify.ts         -- LLM classification
     extract.ts          -- LLM extraction
     dispatch.ts         -- Action dispatch
     action.ts           -- claude -p execution
-    digest.ts           -- Daily digest
+    digest.ts           -- Daily digest (email + calendar sections)
     logger.ts           -- Structured logger
-  mcp/                  -- MCP servers (6)
+  cal/                  -- Calendar integration (iCloud CalDAV)
+    caldav.ts           -- tsdav wrapper, auth, calendar discovery
+    ics.ts              -- ICS parsing helpers
+    sync.ts             -- 30-min sync loop (discover → fetch → upsert)
+    extract.ts          -- Memory-augmented LLM extraction → todos + facts
+    digest.ts           -- "Calendar this week" digest section
+    scripts/            -- CLI scripts (cal-sync, cal-extract, cal-status)
+  mcp/                  -- MCP servers (7)
   memory/               -- Memory subsystem (fact extraction, search, embeddings)
   bridge/               -- Bridge server (HTTP entry point)
   db/

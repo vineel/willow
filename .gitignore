@@ -26,3 +26,7 @@ bun.lockb
 # Runtime state files (memory server)
 memory/could-not-ingest.txt
 memory/retry-later.txt
+
+# One-off analysis artifacts and run outputs
+ds9.local
+notes/farley-assessments/*.json
