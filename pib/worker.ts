@@ -15,6 +15,10 @@ import { runPipeline } from "./pipeline";
 import { sendDigest } from "./digest";
 import { createLogger } from "./logger";
 import { writeVersionInfo } from "../lib/version";
+import { etCronItems, inEasternHour } from "../lib/et-cron";
+import { runCalSync } from "../cal/sync";
+import { runCalExtraction } from "../cal/extract";
+import { runPortfolioReport } from "./portfolio/run";
 
 const log = createLogger("pib.worker");
 const FOLDERS_TO_SYNC = ["inbox", "for-willow", "not-for-willow", "Ai Buzz"];
@@ -33,7 +37,9 @@ const tasks: TaskList = {
     }
   },
 
-  async pib_digest(_payload, _helpers) {
+  async pib_digest(payload, _helpers) {
+    const etHour = (payload as { __etHour?: number })?.__etHour;
+    if (etHour !== undefined && !inEasternHour(etHour)) return;
     log.runStart("Daily digest");
     try {
       const result = await sendDigest();
@@ -46,6 +52,36 @@ const tasks: TaskList = {
       log.error(`Digest failed: ${(err as Error).message}`);
     }
   },
+
+  async portfolio_report(payload, _helpers) {
+    const etHour = (payload as { __etHour?: number })?.__etHour;
+    if (etHour !== undefined && !inEasternHour(etHour)) return;
+    const variant = (payload as { variant?: "premarket" | "midday" | "postclose" })?.variant ?? "midday";
+    log.runStart(`Portfolio valuation (${variant})`);
+    try {
+      await runPortfolioReport(variant);
+      log.info("Portfolio report sent");
+    } catch (err) {
+      log.error(`Portfolio report failed: ${(err as Error).message}`);
+    }
+  },
+
+  async cal_sync(_payload, _helpers) {
+    log.runStart("Calendar sync");
+    try {
+      const stats = await runCalSync();
+      log.info(
+        `Cal sync: ${stats.eventsCreated} created, ${stats.eventsUpdated} updated, ${stats.extractionEnqueued} enqueued`
+      );
+
+      if (stats.extractionEnqueued > 0) {
+        const extractResult = await runCalExtraction();
+        log.info(`Cal extract: ${extractResult.processed} processed, ${extractResult.errors} errors`);
+      }
+    } catch (err) {
+      log.error(`Calendar sync failed: ${(err as Error).message}`);
+    }
+  },
 };
 
 const crontab = parseCronItems([
@@ -54,10 +90,39 @@ const crontab = parseCronItems([
     match: "*/15 * * * *",
     identifier: "pib_ingest_cron",
   },
-  {
+  ...etCronItems({
     task: "pib_digest",
-    match: "0 8 * * *",
     identifier: "pib_digest_cron",
+    hour: 8,
+  }),
+  ...etCronItems({
+    task: "portfolio_report",
+    identifier: "portfolio_premarket_cron",
+    hour: 9,
+    minute: 15,
+    dayOfWeek: "1-5",
+    payload: { variant: "premarket" },
+  }),
+  ...etCronItems({
+    task: "portfolio_report",
+    identifier: "portfolio_midday_cron",
+    hour: 12,
+    minute: 30,
+    dayOfWeek: "1-5",
+    payload: { variant: "midday" },
+  }),
+  ...etCronItems({
+    task: "portfolio_report",
+    identifier: "portfolio_postclose_cron",
+    hour: 16,
+    minute: 15,
+    dayOfWeek: "1-5",
+    payload: { variant: "postclose" },
+  }),
+  {
+    task: "cal_sync",
+    match: "*/30 * * * *",
+    identifier: "cal_sync_cron",
   },
 ]);
 
@@ -81,7 +146,7 @@ async function main() {
     parsedCronItems: crontab,
   });
 
-  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 8am daily");
+  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 8am ET, portfolio 9:15/12:30/16:15 ET M-F, cal_sync */30min");
 
   const shutdown = async () => {
     log.info("Shutting down...");
