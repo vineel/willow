@@ -1,7 +1,7 @@
 import { sql } from "./config";
 import type { CanonicalEvent } from "./jmap/types";
 import type { InterestMatch } from "./interest-matcher";
-import { executeAction, executeActionTodo, logExecution } from "./action";
+import { executeAction, executeActionTodo, executeActionCalendar, logExecution } from "./action";
 import { createLogger } from "./logger";
 
 const log = createLogger("pib.dispatch");
@@ -74,6 +74,19 @@ export async function dispatch(
       await logExecution(factId, null, result.success ? "success" : "failed", result.durationMs, result.error);
       actionResults.push({
         interest: `auto:${intent.category}.${intent.subcategory}`,
+        success: result.success,
+        error: result.error,
+      });
+    }
+
+    // Auto-create calendar events for calendar.invite / calendar.change intents
+    if (intent?.category === "calendar" && (intent.subcategory === "invite" || intent.subcategory === "change")) {
+      const intentKey = `${intent.category}.${intent.subcategory}`;
+      log.info(`Calendar intent detected (${intentKey}), creating calendar event`);
+      const result = await executeActionCalendar(event, intentKey, extractedData);
+      await logExecution(factId, null, result.success ? "success" : "failed", result.durationMs, result.error);
+      actionResults.push({
+        interest: `auto:${intentKey}`,
         success: result.success,
         error: result.error,
       });

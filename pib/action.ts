@@ -2,8 +2,14 @@ import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { sql } from "./config";
+import { createLogger } from "./logger";
 import type { CanonicalEvent } from "./jmap/types";
 import type { Interest } from "./interest-matcher";
+import { generateICS } from "../cal/ics";
+import { createCalendarEvent } from "../cal/caldav";
+import { syncSingleCalendar, getWillowCalendarId } from "../cal/sync";
+
+const calLog = createLogger("pib.action.calendar");
 
 const ACTION_TIMEOUT_MS = 120_000; // 2 minutes
 
@@ -100,6 +106,158 @@ export async function executeActionTodo(
   } finally {
     try { unlinkSync(mcpConfigPath); } catch {}
   }
+}
+
+/**
+ * Create a calendar event from an email classified as calendar.invite or calendar.change.
+ * Does not use claude -p — the extraction step has already produced structured data.
+ * Routes to the primary calendar if confident, Willow staging calendar if ambiguous.
+ */
+export async function executeActionCalendar(
+  event: CanonicalEvent,
+  intentKey: string,
+  extractedData: Record<string, unknown> | null
+): Promise<ActionResult> {
+  const start = Date.now();
+
+  if (!extractedData) {
+    return { success: false, output: "", durationMs: Date.now() - start, error: "No extracted data for calendar event" };
+  }
+
+  try {
+    // Parse extracted fields
+    const eventName = String(extractedData.event_name ?? extractedData.subject ?? event.subject ?? "Event");
+    const dateStr = String(extractedData.date ?? "");
+    const timeStr = String(extractedData.time ?? "");
+    const locationStr = extractedData.location ? String(extractedData.location) : undefined;
+
+    // Try to parse date and time
+    const parsedStart = parseEventDateTime(dateStr, timeStr);
+    if (!parsedStart) {
+      calLog.warn(`Could not parse date/time from extracted data: date="${dateStr}" time="${timeStr}"`);
+      return { success: false, output: "", durationMs: Date.now() - start, error: `Could not parse date: "${dateStr}" time: "${timeStr}"` };
+    }
+
+    // Default end time: 1 hour after start for timed events, next day for all-day
+    const isAllDay = !timeStr;
+    let parsedEnd: Date;
+    if (isAllDay) {
+      parsedEnd = new Date(parsedStart);
+      parsedEnd.setDate(parsedEnd.getDate() + 1);
+    } else if (extractedData.end_time) {
+      const endParsed = parseEventDateTime(dateStr, String(extractedData.end_time));
+      parsedEnd = endParsed ?? new Date(parsedStart.getTime() + 60 * 60 * 1000);
+    } else {
+      parsedEnd = new Date(parsedStart.getTime() + 60 * 60 * 1000);
+    }
+
+    // Confidence routing: clear date+time → personal calendar, fuzzy → Willow
+    const hasTime = !!timeStr;
+    const hasName = eventName !== "Event";
+    const isHighConfidence = hasTime && hasName;
+
+    let calendarId: string;
+    let calendarUrl: string;
+    let calendarName: string;
+
+    if (isHighConfidence) {
+      // Primary personal calendar
+      const [cal] = await sql`
+        SELECT id, url, display_name FROM app.cal_calendar
+        WHERE enabled = true AND is_shared = false AND is_willow = false
+        ORDER BY display_name ASC LIMIT 1
+      `;
+      if (!cal) {
+        return { success: false, output: "", durationMs: Date.now() - start, error: "No personal calendar found" };
+      }
+      calendarId = cal.id;
+      calendarUrl = cal.url;
+      calendarName = cal.display_name;
+    } else {
+      // Willow staging calendar
+      const willowId = await getWillowCalendarId();
+      if (!willowId) {
+        return { success: false, output: "", durationMs: Date.now() - start, error: "Willow calendar not found — run sync first" };
+      }
+      const [cal] = await sql`SELECT id, url, display_name FROM app.cal_calendar WHERE id = ${willowId}`;
+      calendarId = cal.id;
+      calendarUrl = cal.url;
+      calendarName = cal.display_name;
+    }
+
+    // Build description with email provenance
+    const desc = `From email: ${event.fromEntity.displayName} <${event.fromEntity.address}>\nSubject: ${event.subject ?? "(no subject)"}`;
+
+    // Generate ICS and write to CalDAV
+    const uid = `willow-${crypto.randomUUID()}`;
+    const ics = generateICS({
+      uid,
+      summary: eventName,
+      description: desc,
+      location: locationStr,
+      startsAt: parsedStart,
+      endsAt: parsedEnd,
+      allDay: isAllDay,
+    });
+
+    const filename = `${uid}.ics`;
+    await createCalendarEvent(calendarUrl, ics, filename);
+    await syncSingleCalendar(calendarId);
+
+    // Mark source
+    await sql`
+      UPDATE app.cal_event SET source = 'willow'
+      WHERE calendar_id = ${calendarId} AND uid = ${uid} AND deleted_at IS NULL
+    `;
+
+    const confidence = isHighConfidence ? "high" : "low";
+    calLog.info(`Created ${confidence}-confidence event "${eventName}" on "${calendarName}" from ${intentKey}`);
+
+    return {
+      success: true,
+      output: `Created "${eventName}" on ${calendarName} (${confidence} confidence)`,
+      durationMs: Date.now() - start,
+    };
+  } catch (err) {
+    calLog.error(`Failed to create calendar event: ${(err as Error).message}`);
+    return {
+      success: false,
+      output: "",
+      durationMs: Date.now() - start,
+      error: (err as Error).message,
+    };
+  }
+}
+
+/**
+ * Parse a date string and optional time string into a Date.
+ * Handles common formats: YYYY-MM-DD, MM/DD/YYYY, natural language dates.
+ */
+function parseEventDateTime(dateStr: string, timeStr: string): Date | null {
+  if (!dateStr) return null;
+
+  // Try ISO date
+  let date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    // Try other common formats
+    date = new Date(Date.parse(dateStr));
+    if (isNaN(date.getTime())) return null;
+  }
+
+  if (timeStr) {
+    // Parse time like "2:00 PM", "14:00", "2pm"
+    const timeMatch = timeStr.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)?/i);
+    if (timeMatch) {
+      let hours = parseInt(timeMatch[1]);
+      const minutes = parseInt(timeMatch[2] ?? "0");
+      const ampm = timeMatch[3]?.toLowerCase();
+      if (ampm === "pm" && hours < 12) hours += 12;
+      if (ampm === "am" && hours === 12) hours = 0;
+      date.setHours(hours, minutes, 0, 0);
+    }
+  }
+
+  return date;
 }
 
 function composePrompt(
