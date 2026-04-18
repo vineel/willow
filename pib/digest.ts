@@ -6,6 +6,11 @@ import { sql, getSecret } from "./config";
 import { getSession, getMailboxes } from "./jmap/session";
 import { sendNotification } from "./jmap/notify";
 import { createLogger } from "./logger";
+import {
+  getCalDigestSection,
+  formatCalDigestText,
+  formatCalDigestHtml,
+} from "../cal/digest";
 
 const log = createLogger("pib.digest");
 
@@ -239,11 +244,17 @@ function escapeHtml(s: string): string {
 export async function previewDigest(): Promise<{ text: string; count: number }> {
   const items = await getPendingDigestItems();
   const todos = await getPendingTodos();
-  if (items.length === 0 && todos.length === 0) {
-    return { text: "No pending digest items or todos.", count: 0 };
+  const calSection = await getCalDigestSection();
+
+  if (items.length === 0 && todos.length === 0 && !calSection) {
+    return { text: "No pending digest items, todos, or calendar events.", count: 0 };
   }
   const groups = groupDigestItems(items);
-  return { text: formatDigestText(groups, items.length, todos), count: items.length };
+  let text = formatDigestText(groups, items.length, todos);
+  if (calSection) {
+    text += "\n" + formatCalDigestText(calSection);
+  }
+  return { text, count: items.length };
 }
 
 /**
@@ -252,15 +263,25 @@ export async function previewDigest(): Promise<{ text: string; count: number }> 
 export async function sendDigest(): Promise<{ sent: boolean; count: number }> {
   const items = await getPendingDigestItems();
   const todos = await getPendingTodos();
-  if (items.length === 0 && todos.length === 0) {
-    log.info("No pending digest items or todos");
+  const calSection = await getCalDigestSection();
+
+  if (items.length === 0 && todos.length === 0 && !calSection) {
+    log.info("No pending digest items, todos, or calendar events");
     return { sent: false, count: 0 };
   }
-  log.info(`Composing digest with ${items.length} items, ${todos.length} todos`);
+  log.info(`Composing digest with ${items.length} items, ${todos.length} todos${calSection ? ", calendar section" : ""}`);
 
   const groups = groupDigestItems(items);
-  const bodyText = formatDigestText(groups, items.length, todos);
-  const bodyHtml = formatDigestHtml(groups, items.length, todos);
+  let bodyText = formatDigestText(groups, items.length, todos);
+  let bodyHtml = formatDigestHtml(groups, items.length, todos);
+
+  if (calSection) {
+    bodyText += "\n" + formatCalDigestText(calSection);
+    bodyHtml = bodyHtml.replace(
+      "</div>",
+      formatCalDigestHtml(calSection) + "</div>"
+    );
+  }
 
   // Send via JMAP
   const token = await getSecret("fastmail-token");
