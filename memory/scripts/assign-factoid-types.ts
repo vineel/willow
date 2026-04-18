@@ -11,13 +11,24 @@
 //
 // All decisions logged to notes/farley-assessments/type-assignment-<date>.json.
 //
-//   bun run memory/scripts/assign-factoid-types.ts              # dry-run
+//   bun run memory/scripts/assign-factoid-types.ts              # dry-run, null-type only
 //   bun run memory/scripts/assign-factoid-types.ts --apply      # write
+//   bun run memory/scripts/assign-factoid-types.ts --all        # re-classify EVERY factoid
+//                                                               # (skips hard rule + pass 2;
+//                                                               #  pass 1 only, overwrites type)
 
 import { mkdir } from "node:fs/promises";
 import { sql } from "../db";
 
 const APPLY = process.argv.includes("--apply");
+const ALL = process.argv.includes("--all");
+
+function argValue(name: string): string | null {
+  const idx = process.argv.indexOf(name);
+  return idx >= 0 ? (process.argv[idx + 1] ?? null) : null;
+}
+const MIN_CONFIDENCE = Number(argValue("--min-confidence") ?? "0.85");
+const PIB_ONLY = process.argv.includes("--pib-only");
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-haiku-4-5-20251001";
@@ -50,9 +61,13 @@ const hardRuleRows = await sql<Array<{ fact_id: string; title: string }>>`
     AND sn.filename LIKE ${SERIALS_PATH_PAT}
 `;
 
-console.log(`Hard rule: ${hardRuleRows.length} rows from Logins/Accts/Serials/* → Account`);
+console.log(
+  ALL
+    ? `Hard rule: skipped (--all mode)`
+    : `Hard rule: ${hardRuleRows.length} rows from Logins/Accts/Serials/* → Account`,
+);
 
-if (APPLY && hardRuleRows.length > 0) {
+if (!ALL && !PIB_ONLY && APPLY && hardRuleRows.length > 0) {
   const ids = hardRuleRows.map((r) => r.fact_id);
   await sql`
     UPDATE app.fact
@@ -98,6 +113,33 @@ interface TargetRow {
 }
 
 async function loadTargets(): Promise<TargetRow[]> {
+  if (PIB_ONLY) {
+    // Only factoids that are linked via entity_address (PIB-minted senders).
+    // These lack source_note content, so the LLM has less to go on — the
+    // decision is mostly name/address heuristic.
+    return await sql<TargetRow[]>`
+      SELECT DISTINCT f.fact_id, f.title, f.content, f.keywords,
+             NULL::text AS source_filename
+      FROM app.fact f
+      JOIN app.entity_address ea ON ea.factoid_id = f.fact_id
+      WHERE f.is_active = true
+        AND f.is_factoid = true
+        AND f.title IS NOT NULL
+      ORDER BY f.fact_id ASC
+    `;
+  }
+  if (ALL) {
+    return await sql<TargetRow[]>`
+      SELECT f.fact_id, f.title, f.content, f.keywords,
+             sn.filename AS source_filename
+      FROM app.fact f
+      LEFT JOIN app.source_note sn ON sn.source_note_id = f.source_note_id
+      WHERE f.is_active = true
+        AND f.is_factoid = true
+        AND f.title IS NOT NULL
+      ORDER BY f.created_at ASC
+    `;
+  }
   return await sql<TargetRow[]>`
     SELECT f.fact_id, f.title, f.content, f.keywords,
            sn.filename AS source_filename
@@ -204,27 +246,47 @@ async function callHaiku(
   const apiKey = process.env.ANTHRO_API_KEY;
   if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
 
-  const res = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 256,
-      system: [
-        { type: "text", text: system, cache_control: { type: "ephemeral" } },
-      ],
-      messages: [{ role: "user", content: userPrompt }],
-    }),
-    signal: AbortSignal.timeout(60_000),
-  });
+  // Retry transient errors (429 rate limit, 529 overloaded, 503 unavailable)
+  // with exponential backoff. Fail fast on 4xx client errors.
+  const RETRYABLE = new Set([429, 503, 529]);
+  const MAX_ATTEMPTS = 5;
+  let res!: Response;
+  let lastBody = "";
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    res = await fetch(ANTHROPIC_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 256,
+        system: [
+          { type: "text", text: system, cache_control: { type: "ephemeral" } },
+        ],
+        messages: [{ role: "user", content: userPrompt }],
+      }),
+      signal: AbortSignal.timeout(60_000),
+    });
+
+    if (res.ok) break;
+    lastBody = await res.text();
+
+    if (!RETRYABLE.has(res.status) || attempt === MAX_ATTEMPTS - 1) {
+      throw new Error(`Haiku ${res.status}: ${lastBody}`);
+    }
+
+    const backoffMs = Math.min(2_000 * 2 ** attempt, 30_000);
+    console.log(
+      `  [haiku ${res.status}] overloaded, waiting ${backoffMs}ms (attempt ${attempt + 1}/${MAX_ATTEMPTS})`,
+    );
+    await new Promise((r) => setTimeout(r, backoffMs));
+  }
 
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Haiku ${res.status}: ${body}`);
+    throw new Error(`Haiku ${res.status}: ${lastBody}`);
   }
 
   const data = (await res.json()) as {
@@ -291,7 +353,7 @@ for (const row of pass1Targets) {
   let applied = false;
   let apply_note = "dry-run";
 
-  if (verdict.action === "assign" && verdict.factoid_type && verdict.confidence >= 0.85) {
+  if (verdict.action === "assign" && verdict.factoid_type && verdict.confidence >= MIN_CONFIDENCE) {
     if (APPLY) {
       await sql`UPDATE app.fact SET factoid_type = ${verdict.factoid_type} WHERE fact_id = ${row.fact_id}`;
       applied = true;
@@ -310,9 +372,14 @@ for (const row of pass1Targets) {
 // Pass 2: demote or assign, with parent_hint
 // ============================================================================
 
+if (ALL || PIB_ONLY) {
+  console.log("");
+  console.log(`Pass 2 skipped (${PIB_ONLY ? "--pib-only" : "--all"} mode: assign-only re-classification).`);
+}
+
 console.log("");
 console.log("Loading pass-2 targets + allowlist...");
-const pass2Targets = await loadTargets();
+const pass2Targets = (ALL || PIB_ONLY) ? [] : await loadTargets();
 const allowlist = await loadAllowlist();
 console.log(`  ${pass2Targets.length} remaining null-type factoids`);
 console.log(`  ${allowlist.length} allowlist entries`);
@@ -341,7 +408,7 @@ for (const row of pass2Targets) {
   let applied = false;
   let apply_note = "dry-run";
 
-  if (verdict.confidence < 0.85 || verdict.action === "unsure") {
+  if (verdict.confidence < MIN_CONFIDENCE || verdict.action === "unsure") {
     apply_note = `skipped (${verdict.action}, conf ${verdict.confidence.toFixed(2)})`;
   } else if (verdict.action === "assign" && verdict.factoid_type) {
     if (APPLY) {
@@ -407,7 +474,8 @@ console.log("");
 
 const AUDIT_DIR = `${import.meta.dir}/../../notes/farley-assessments`;
 await mkdir(AUDIT_DIR, { recursive: true });
-const auditPath = `${AUDIT_DIR}/type-assignment-2026-04-13.json`;
+const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+const auditPath = `${AUDIT_DIR}/type-assignment-${stamp}${ALL ? "-all" : ""}.json`;
 await Bun.write(
   auditPath,
   JSON.stringify(

@@ -3,25 +3,128 @@ import { config } from "../config";
 import { chatCompletion, ensureModelLoaded } from "../lmstudio/client";
 import { EXTRACTION_SYSTEM_PROMPT, buildUserPrompt } from "./prompts";
 
+// ============================================================================
+// Types — mirror the new entity-first extraction schema (see prompts.ts)
+// ============================================================================
+
+const VALID_FACTOID_TYPES = [
+  "Person",
+  "Place",
+  "Organization",
+  "Event",
+  "Concept",
+  "Product",
+  "Account",
+  "Unknown",
+] as const;
+
+interface ExtractedEntity {
+  localId: string;             // e1, e2, ... — valid only within this extraction
+  title: string;
+  factoid_type: string;        // one of VALID_FACTOID_TYPES
+  confidence: number;
+}
+
 interface ExtractedFact {
   title: string;
   content: string;
+  primary: string | null;      // local entity id
+  mentions: string[];          // local entity ids
   action: "remember" | "verify_world" | "verify_human";
   keywords: string[];
-  entities: string[];
   qe_text: string;
   confidence: number;
   is_sensitive: boolean;
-  is_factoid: boolean;
-  factoid_type: string | null;
   expires_type: string;
+}
+
+interface ExtractedRelationship {
+  from: string;                // local entity id
+  to: string;                  // local entity id
+  type: string;
+  inverse: string | null;
+}
+
+interface Extraction {
+  summary: string | null;
+  entities: ExtractedEntity[];
+  facts: ExtractedFact[];
+  relationships: ExtractedRelationship[];
 }
 
 interface ExtractionResult {
   sourceNoteId: string;
+  entityCount: number;
   factCount: number;
+  relCount: number;
   skipped: boolean;
 }
+
+// ============================================================================
+// JSON schema for LM Studio structured output
+// ============================================================================
+
+const nullableString = { anyOf: [{ type: "string" }, { type: "null" }] };
+
+const EXTRACTION_JSON_SCHEMA = {
+  name: "willow_extraction",
+  schema: {
+    type: "object",
+    required: ["s", "e", "f", "r"],
+    properties: {
+      s: nullableString,
+      e: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["id", "t", "rt", "c"],
+          properties: {
+            id: { type: "string" },
+            t: { type: "string" },
+            rt: { type: "string", enum: VALID_FACTOID_TYPES as unknown as string[] },
+            c: { type: "number" },
+          },
+        },
+      },
+      f: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["t", "x", "primary", "mentions", "a", "k", "q", "c", "sn", "e"],
+          properties: {
+            t: { type: "string" },
+            x: { type: "string" },
+            primary: nullableString,
+            mentions: { type: "array", items: { type: "string" } },
+            a: { type: "string", enum: ["remember", "verify_world", "verify_human"] },
+            k: { type: "array", items: { type: "string" } },
+            q: { type: "string" },
+            c: { type: "number" },
+            sn: { type: "boolean" },
+            e: { type: "string", enum: ["never", "weighted", "date"] },
+          },
+        },
+      },
+      r: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["from", "to", "type", "inverse"],
+          properties: {
+            from: { type: "string" },
+            to: { type: "string" },
+            type: { type: "string" },
+            inverse: nullableString,
+          },
+        },
+      },
+    },
+  },
+};
+
+// ============================================================================
+// LLM call
+// ============================================================================
 
 async function computeHash(text: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -31,36 +134,88 @@ async function computeHash(text: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Call the local LLM to extract facts. Throws on failure (timeout, context too large, bad JSON). */
+/** Call the local LLM with the new entity-first schema. Throws on failure. */
 export async function extractWithLocalLLM(
   rawText: string,
   filePath?: string,
 ): Promise<{ parsed: unknown }> {
   await ensureModelLoaded();
   const start = Date.now();
-  const { parsed, usage } = await chatCompletion([
-    { role: "system", content: EXTRACTION_SYSTEM_PROMPT },
-    { role: "user", content: buildUserPrompt(rawText, filePath) },
-  ]);
+  const { parsed, usage } = await chatCompletion(
+    [
+      { role: "system", content: EXTRACTION_SYSTEM_PROMPT },
+      { role: "user", content: buildUserPrompt(rawText, filePath) },
+    ],
+    { jsonSchema: EXTRACTION_JSON_SCHEMA },
+  );
   const durationSec = (Date.now() - start) / 1000;
   if (usage) {
     const totalTokens = (usage.prompt_tokens ?? 0) + (usage.completion_tokens ?? 0);
     const tokPerSec = durationSec > 0 ? (totalTokens / durationSec).toFixed(1) : "?";
-    console.log(`[lmstudio] ${usage.prompt_tokens}in/${usage.completion_tokens}out tokens, ${durationSec.toFixed(1)}s, ${tokPerSec} tok/s`);
+    console.log(
+      `[lmstudio] ${usage.prompt_tokens}in/${usage.completion_tokens}out tokens, ${durationSec.toFixed(1)}s, ${tokPerSec} tok/s`,
+    );
   }
   return { parsed };
 }
 
-/** Save extraction results (from any LLM) to the database. */
+// ============================================================================
+// Factoid resolution helper
+// ============================================================================
+
+/**
+ * Find an active factoid with the same type + exact lowercased title, or
+ * insert a new one. Returns the fact_id and whether we created it.
+ * Mirrors the conservative on-insert dedupe used previously at extract.ts:159–175.
+ */
+async function resolveOrCreateFactoid(
+  title: string,
+  factoidType: string,
+  sourceNoteId: string,
+  sourceOrdinal: number,
+  confidence: number,
+): Promise<{ factId: string; created: boolean }> {
+  const normalized = title.toLowerCase().trim();
+
+  const [existing] = await sql`
+    SELECT fact_id FROM app.fact
+    WHERE is_active = true
+      AND is_factoid = true
+      AND factoid_type = ${factoidType}
+      AND lower(btrim(title)) = ${normalized}
+    LIMIT 1
+  `;
+  if (existing) return { factId: existing.fact_id, created: false };
+
+  const [inserted] = await sql`
+    INSERT INTO app.fact (
+      source_note_id, source_ordinal, title, content,
+      keywords, qe_text, confidence, memory_type, status,
+      is_factoid, factoid_type, parent_factoid_id, expires_type
+    ) VALUES (
+      ${sourceNoteId}, ${sourceOrdinal}, ${title}, ${title},
+      ${[] as string[]}, ${""}, ${confidence}, 'short_term', 'raw',
+      true, ${factoidType}, null, 'never'
+    )
+    RETURNING fact_id
+  `;
+  return { factId: inserted.fact_id, created: true };
+}
+
+// ============================================================================
+// saveExtraction — persist entity-first extraction to DB
+// ============================================================================
+
 export async function saveExtraction(
   filePath: string,
   rawText: string,
   parsed: unknown,
   extractedBy: string = "local",
+  options: { force?: boolean } = {},
 ): Promise<ExtractionResult> {
+  const { force = false } = options;
   const contentHash = await computeHash(rawText);
 
-  // Check for existing source_note with this filename
   let existing = await sql`
     SELECT source_note_id, content_hash
     FROM app.source_note
@@ -68,13 +223,18 @@ export async function saveExtraction(
     LIMIT 1
   `;
 
-  // Skip if content hasn't changed
-  if (existing.length > 0 && existing[0].content_hash === contentHash) {
+  if (!force && existing.length > 0 && existing[0].content_hash === contentHash) {
     console.log(`[extractor] Skipping ${filePath} — content unchanged`);
-    return { sourceNoteId: existing[0].source_note_id, factCount: 0, skipped: true };
+    return {
+      sourceNoteId: existing[0].source_note_id,
+      entityCount: 0,
+      factCount: 0,
+      relCount: 0,
+      skipped: true,
+    };
   }
 
-  // If no match by filename, check if this is a rename (same content, different filename)
+  // Rename detection: same content, different filename
   if (existing.length === 0) {
     const byHash = await sql`
       SELECT source_note_id, content_hash, filename
@@ -90,7 +250,6 @@ export async function saveExtraction(
             title = ${filePath.split("/").pop() ?? filePath}
         WHERE source_note_id = ${byHash[0].source_note_id}
       `;
-      // Reactivate facts in case the unlink handler already deactivated them
       const [reactivated] = await sql`
         UPDATE app.fact
         SET is_active = true, updated_at = now()
@@ -100,11 +259,21 @@ export async function saveExtraction(
       if (reactivated?.cnt > 0) {
         console.log(`[extractor] Reactivated ${reactivated.cnt} facts after rename`);
       }
-      return { sourceNoteId: byHash[0].source_note_id, factCount: 0, skipped: true };
+      return {
+        sourceNoteId: byHash[0].source_note_id,
+        entityCount: 0,
+        factCount: 0,
+        relCount: 0,
+        skipped: true,
+      };
     }
   }
 
-  // If content changed, deactivate old facts (v1: nuke-and-replace)
+  // Content changed (or force) → deactivate this note's old NON-FACTOID rows.
+  // We deliberately leave factoid rows (is_factoid=true) active: an entity
+  // factoid may have been minted by this note but now has children from
+  // other notes, and re-extraction will dedupe back onto it via
+  // resolveOrCreateFactoid. Orphaned factoids can be cleaned up later.
   if (existing.length > 0) {
     console.log(`[extractor] Note updated: ${filePath} — deactivating old facts`);
     await sql`
@@ -112,10 +281,11 @@ export async function saveExtraction(
       SET is_active = false, updated_at = now()
       WHERE source_note_id = ${existing[0].source_note_id}
         AND is_active = true
+        AND is_factoid = false
     `;
   }
 
-  const { summary, facts } = validateExtraction(parsed);
+  const extraction = validateExtraction(parsed);
 
   // Upsert source_note
   const [sourceNote] = existing.length > 0
@@ -124,55 +294,51 @@ export async function saveExtraction(
         SET raw_text = ${rawText},
             content_hash = ${contentHash},
             title = ${filePath.split("/").pop() ?? filePath},
-            summary = ${summary},
+            summary = ${extraction.summary},
             extracted_by = ${extractedBy}
         WHERE source_note_id = ${existing[0].source_note_id}
         RETURNING source_note_id
       `
     : await sql`
         INSERT INTO app.source_note (source_type, filename, raw_text, content_hash, title, summary, extracted_by)
-        VALUES ('file', ${filePath}, ${rawText}, ${contentHash}, ${filePath.split("/").pop() ?? filePath}, ${summary}, ${extractedBy})
+        VALUES ('file', ${filePath}, ${rawText}, ${contentHash}, ${filePath.split("/").pop() ?? filePath}, ${extraction.summary}, ${extractedBy})
         RETURNING source_note_id
       `;
 
   const sourceNoteId = sourceNote.source_note_id;
 
-  if (facts.length === 0) {
-    console.log(`[extractor] No facts extracted from ${filePath}`);
-    return { sourceNoteId, factCount: 0, skipped: false };
+  if (extraction.entities.length === 0 && extraction.facts.length === 0) {
+    console.log(`[extractor] No entities or facts extracted from ${filePath}`);
+    return { sourceNoteId, entityCount: 0, factCount: 0, relCount: 0, skipped: false };
   }
 
-  // Insert facts and queue entries
-  for (let i = 0; i < facts.length; i++) {
-    const fact = facts[i];
+  // ------------------------------------------------------------------
+  // 1. Resolve entities → local id → fact_id
+  // ------------------------------------------------------------------
+  const entityFactIds = new Map<string, string>();
+  let createdEntities = 0;
+  let reusedEntities = 0;
+  let ordinal = 1;
 
-    // On-insert dedupe — see notes/person-dedupe-strategy.md §7.
-    // If the extractor says this is a factoid and there is already an
-    // active factoid with the same type and exact title, store the new
-    // fact as a CHILD of the existing factoid instead of minting a
-    // duplicate top-level row. Conservative: only exact lowercased title
-    // match. Broader semantic / trigram matching happens in the periodic
-    // maintenance worker.
-    let is_factoid = fact.is_factoid;
-    let factoid_type: string | null = fact.factoid_type;
-    let parent_factoid_id: string | null = null;
-    if (fact.is_factoid && fact.factoid_type) {
-      const [existingFactoid] = await sql`
-        SELECT fact_id FROM app.fact
-        WHERE is_active = true AND is_factoid = true
-          AND factoid_type = ${fact.factoid_type}
-          AND lower(btrim(title)) = ${fact.title.toLowerCase().trim()}
-        LIMIT 1
-      `;
-      if (existingFactoid) {
-        is_factoid = false;
-        factoid_type = null;
-        parent_factoid_id = existingFactoid.fact_id;
-        console.log(
-          `[extractor] dedupe-on-insert: "${fact.title}" → child of ${existingFactoid.fact_id}`,
-        );
-      }
-    }
+  for (const ent of extraction.entities) {
+    const { factId, created } = await resolveOrCreateFactoid(
+      ent.title,
+      ent.factoid_type,
+      sourceNoteId,
+      ordinal++,
+      ent.confidence,
+    );
+    entityFactIds.set(ent.localId, factId);
+    if (created) createdEntities++;
+    else reusedEntities++;
+  }
+
+  // ------------------------------------------------------------------
+  // 2. Insert facts as non-factoid rows, parented to primary entity
+  // ------------------------------------------------------------------
+  const factRowByIndex: string[] = [];
+  for (const fact of extraction.facts) {
+    const parentId = fact.primary ? entityFactIds.get(fact.primary) ?? null : null;
 
     const [inserted] = await sql`
       INSERT INTO app.fact (
@@ -180,13 +346,14 @@ export async function saveExtraction(
         keywords, qe_text, confidence, memory_type, status,
         is_factoid, factoid_type, parent_factoid_id, expires_type
       ) VALUES (
-        ${sourceNoteId}, ${i + 1}, ${fact.title}, ${fact.content},
+        ${sourceNoteId}, ${ordinal++}, ${fact.title}, ${fact.content},
         ${fact.keywords}, ${fact.qe_text}, ${fact.confidence},
         'short_term', 'raw',
-        ${is_factoid}, ${factoid_type}, ${parent_factoid_id}, ${fact.expires_type}
+        false, null, ${parentId}, ${fact.expires_type}
       )
       RETURNING fact_id
     `;
+    factRowByIndex.push(inserted.fact_id);
 
     await sql`
       INSERT INTO app.fact_queue (fact_id, action)
@@ -194,8 +361,47 @@ export async function saveExtraction(
     `;
   }
 
-  console.log(`[extractor] Extracted ${facts.length} facts from ${filePath}`);
-  return { sourceNoteId, factCount: facts.length, skipped: false };
+  // ------------------------------------------------------------------
+  // 3. Insert relationships between entities (factoid → factoid)
+  // ------------------------------------------------------------------
+  let relsInserted = 0;
+  for (const rel of extraction.relationships) {
+    const fromId = entityFactIds.get(rel.from);
+    const toId = entityFactIds.get(rel.to);
+    if (!fromId || !toId || fromId === toId) continue;
+
+    // source_fact_id: first inserted fact that mentions both endpoints
+    let sourceFactId: string | null = null;
+    for (let i = 0; i < extraction.facts.length; i++) {
+      const f = extraction.facts[i];
+      if (f.mentions.includes(rel.from) && f.mentions.includes(rel.to)) {
+        sourceFactId = factRowByIndex[i] ?? null;
+        break;
+      }
+    }
+
+    const inserted = await sql`
+      INSERT INTO app.fact_relationship (
+        from_factoid_id, to_factoid_id, type, inverse_type, source_fact_id
+      ) VALUES (
+        ${fromId}, ${toId}, ${rel.type}, ${rel.inverse}, ${sourceFactId}
+      )
+      ON CONFLICT (from_factoid_id, to_factoid_id, type) DO NOTHING
+      RETURNING relationship_id
+    `;
+    if (inserted.length > 0) relsInserted++;
+  }
+
+  console.log(
+    `[extractor] ${filePath}: ${createdEntities} new entities (${reusedEntities} reused), ${extraction.facts.length} facts, ${relsInserted} rels`,
+  );
+  return {
+    sourceNoteId,
+    entityCount: createdEntities + reusedEntities,
+    factCount: extraction.facts.length,
+    relCount: relsInserted,
+    skipped: false,
+  };
 }
 
 /** Convenience: try local LLM and save in one step. */
@@ -208,36 +414,70 @@ export async function extractFromNote(
   return saveExtraction(filePath, rawText, parsed, config.lmstudio.chatModel);
 }
 
-function validateExtraction(parsed: unknown): { summary: string | null; facts: ExtractedFact[] } {
-  if (!parsed || typeof parsed !== "object") return { summary: null, facts: [] };
+// ============================================================================
+// Validation / parsing
+// ============================================================================
 
+function validateExtraction(parsed: unknown): Extraction {
+  if (!parsed || typeof parsed !== "object") {
+    return { summary: null, entities: [], facts: [], relationships: [] };
+  }
   const obj = parsed as Record<string, unknown>;
 
-  // Summary: abbreviated key "s"
   const summary = typeof obj.s === "string" ? obj.s : null;
 
-  // Facts: abbreviated key "f", fall back to "facts" for robustness
-  const rawFacts = Array.isArray(obj.f) ? obj.f : Array.isArray(obj.facts) ? obj.facts : [];
+  const rawEntities = Array.isArray(obj.e) ? obj.e : [];
+  const entities = rawEntities
+    .filter((e): e is Record<string, unknown> => e != null && typeof e === "object")
+    .map((e): ExtractedEntity | null => {
+      const localId = typeof e.id === "string" ? e.id : null;
+      const title = typeof e.t === "string" ? e.t.trim() : null;
+      const factoid_type = validateFactoidType(e.rt);
+      if (!localId || !title || !factoid_type) return null;
+      return { localId, title, factoid_type, confidence: toConfidence(e.c) };
+    })
+    .filter((e): e is ExtractedEntity => e !== null);
 
+  // Dedupe entities by localId (last write wins)
+  const entityById = new Map<string, ExtractedEntity>();
+  for (const ent of entities) entityById.set(ent.localId, ent);
+  const dedupedEntities = Array.from(entityById.values());
+
+  const rawFacts = Array.isArray(obj.f) ? obj.f : [];
   const facts = rawFacts
     .filter((f): f is Record<string, unknown> => f != null && typeof f === "object")
-    .map((f) => ({
-      // Map abbreviated keys, fall back to full keys
-      title: String(f.t ?? f.title ?? "Untitled"),
-      content: String(f.x ?? f.text ?? f.content ?? ""),
-      action: validateAction(f.a ?? f.action),
-      keywords: toStringArray(f.k ?? f.keywords),
-      entities: toStringArray(f.en ?? f.entities),
-      qe_text: String(f.q ?? f.qe_text ?? ""),
-      confidence: toConfidence(f.c ?? f.confidence),
-      is_sensitive: (f.sn ?? f.is_sensitive) === true,
-      is_factoid: (f.r ?? f.is_root ?? f.is_factoid) === true,
-      factoid_type: validateFactoidType(f.rt ?? f.root_type ?? f.factoid_type),
-      expires_type: validateExpiresType(f.e ?? f.expires_type),
+    .map((f): ExtractedFact => ({
+      title: String(f.t ?? "Untitled"),
+      content: String(f.x ?? ""),
+      primary: typeof f.primary === "string" ? f.primary : null,
+      mentions: toStringArray(f.mentions),
+      action: validateAction(f.a),
+      keywords: toStringArray(f.k),
+      qe_text: String(f.q ?? ""),
+      confidence: toConfidence(f.c),
+      is_sensitive: f.sn === true,
+      expires_type: validateExpiresType(f.e),
     }))
     .filter((f) => f.content.length > 0);
 
-  return { summary, facts };
+  const rawRels = Array.isArray(obj.r) ? obj.r : [];
+  const relationships = rawRels
+    .filter((r): r is Record<string, unknown> => r != null && typeof r === "object")
+    .map((r): ExtractedRelationship | null => {
+      const from = typeof r.from === "string" ? r.from : null;
+      const to = typeof r.to === "string" ? r.to : null;
+      const type = typeof r.type === "string" ? r.type.trim() : null;
+      if (!from || !to || !type) return null;
+      return {
+        from,
+        to,
+        type,
+        inverse: typeof r.inverse === "string" ? r.inverse : null,
+      };
+    })
+    .filter((r): r is ExtractedRelationship => r !== null);
+
+  return { summary, entities: dedupedEntities, facts, relationships };
 }
 
 function validateAction(val: unknown): "remember" | "verify_world" | "verify_human" {
@@ -246,11 +486,9 @@ function validateAction(val: unknown): "remember" | "verify_world" | "verify_hum
 }
 
 function validateFactoidType(val: unknown): string | null {
-  const valid = [
-    "Person", "Place", "Organization", "Event", "Concept", "Product",
-    "Account", "Unknown",
-  ];
-  if (typeof val === "string" && valid.includes(val)) return val;
+  if (typeof val === "string" && (VALID_FACTOID_TYPES as readonly string[]).includes(val)) {
+    return val;
+  }
   return null;
 }
 
