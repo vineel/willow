@@ -8,7 +8,7 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL ?? "postgres://localhost/willow",
   lmstudio: {
     baseUrl: process.env.LMSTUDIO_BASE_URL ?? "http://localhost:1234/v1",
-    chatModel: process.env.LMSTUDIO_CHAT_MODEL ?? "google/gemma-3n-e4b",
+    chatModel: process.env.LMSTUDIO_CHAT_MODEL ?? "google/gemma-4-e4b",
     embedModel: process.env.LMSTUDIO_EMBED_MODEL ?? "nomic-embed-text-v1.5",
   },
   notesRoot: required("NOTES_ROOT"),

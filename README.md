@@ -8,7 +8,7 @@ Runs on a Mac Mini behind Tailscale. Uses PostgreSQL, Bun, LM Studio, and Claude
 
 - [Bun](https://bun.sh) installed
 - PostgreSQL running locally with a `willow` database
-- [LM Studio](https://lmstudio.ai) running on port 1234 with a chat model loaded (e.g. `google/gemma-3n-e4b`)
+- [LM Studio](https://lmstudio.ai) running on port 1234 with a chat model loaded (e.g. `google/gemma-4-e4b`)
 - Claude Code CLI installed (`claude` in PATH)
 - macOS Keychain entries (see Setup)
 

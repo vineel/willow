@@ -30,3 +30,6 @@ memory/retry-later.txt
 # One-off analysis artifacts and run outputs
 ds9.local
 notes/farley-assessments/*.json
+
+# Vendored MCP servers (cloned repos)
+spotify-mcp-server/

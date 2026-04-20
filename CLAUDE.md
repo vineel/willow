@@ -9,7 +9,7 @@ Willow is a personal AI agent system with three core purposes: a **Second Brain*
 ## Architecture Summary
 
 **Three LLM tiers, one subscription:**
-- **Local model** (Gemma 3n via LM Studio) — mechanical work: classification, extraction, tagging, keyword assignment
+- **Local model** (Gemma 4 via LM Studio) — mechanical work: classification, extraction, tagging, keyword assignment
 - **Haiku** (via Anthropic API) — fallback for local model failures (after sensitivity check)
 - **Claude Sonnet** (via `claude -p` on Max subscription) — reasoning: action execution with MCP tools, entity resolution, judgment calls
 
@@ -153,7 +153,7 @@ Schema: `db/schema.sql` (full), `db/migrations/001-pib-tables.sql` (PIB migratio
 - **Language:** TypeScript
 - **HTTP Framework:** Fastify (bridge), Hono (memory)
 - **Database:** PostgreSQL + pgvector
-- **Local LLM:** LM Studio (Gemma 3n)
+- **Local LLM:** LM Studio (Gemma 4)
 - **Embeddings:** nomic-embed-text via LM Studio
 - **Scheduling:** Graphile Worker
 - **Process Management:** tmux (headless Mac Mini)
