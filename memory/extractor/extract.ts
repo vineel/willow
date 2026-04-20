@@ -409,6 +409,24 @@ export async function extractFromNote(
   filePath: string,
   rawText: string,
 ): Promise<ExtractionResult> {
+  const contentHash = await computeHash(rawText);
+  const existing = await sql`
+    SELECT source_note_id, content_hash
+    FROM app.source_note
+    WHERE filename = ${filePath}
+    LIMIT 1
+  `;
+  if (existing.length > 0 && existing[0].content_hash === contentHash) {
+    console.log(`[extractor] Skipping ${filePath} — content unchanged`);
+    return {
+      sourceNoteId: existing[0].source_note_id,
+      entityCount: 0,
+      factCount: 0,
+      relCount: 0,
+      skipped: true,
+    };
+  }
+
   console.log(`[extractor] Extracting facts from ${filePath}...`);
   const { parsed } = await extractWithLocalLLM(rawText, filePath);
   return saveExtraction(filePath, rawText, parsed, config.lmstudio.chatModel);
