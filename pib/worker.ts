@@ -92,8 +92,16 @@ const crontab = parseCronItems([
   },
   ...etCronItems({
     task: "pib_digest",
-    identifier: "pib_digest_cron",
+    identifier: "pib_digest_weekday_cron",
+    hour: 6,
+    minute: 45,
+    dayOfWeek: "1-5",
+  }),
+  ...etCronItems({
+    task: "pib_digest",
+    identifier: "pib_digest_weekend_cron",
     hour: 8,
+    dayOfWeek: "0,6",
   }),
   ...etCronItems({
     task: "portfolio_report",
@@ -146,7 +154,7 @@ async function main() {
     parsedCronItems: crontab,
   });
 
-  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 8am ET, portfolio 9:15/12:30/16:15 ET M-F, cal_sync */30min");
+  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 6:45am ET M-F / 8am ET Sat-Sun, portfolio 9:15/12:30/16:15 ET M-F, cal_sync */30min");
 
   const shutdown = async () => {
     log.info("Shutting down...");
