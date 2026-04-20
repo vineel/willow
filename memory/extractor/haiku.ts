@@ -1,4 +1,5 @@
 import { EXTRACTION_SYSTEM_PROMPT, buildUserPrompt } from "./prompts";
+import { getSecret } from "../../pib/config";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 
@@ -16,10 +17,7 @@ export async function extractWithHaiku(
   rawText: string,
   filePath?: string,
 ): Promise<{ parsed: unknown; usage?: { input_tokens: number; output_tokens: number } }> {
-  const apiKey = process.env.ANTHRO_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHRO_API_KEY not set — cannot use Haiku fallback");
-  }
+  const apiKey = await getSecret("ANTHRO_API_KEY");
 
   const userMessage = buildUserPrompt(rawText, filePath);
 

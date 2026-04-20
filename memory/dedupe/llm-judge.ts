@@ -2,6 +2,8 @@
 // Prompt-cached system prompt so ~1000 pair calls cost ~$0.10 (see
 // notes/person-dedupe-strategy.md §4).
 
+import { getSecret } from "../../pib/config";
+
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-haiku-4-5-20251001";
 
@@ -47,8 +49,7 @@ export interface JudgeVerdict {
 }
 
 export async function judgePair(input: JudgeInput): Promise<JudgeVerdict> {
-  const apiKey = process.env.ANTHRO_API_KEY;
-  if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
+  const apiKey = await getSecret("ANTHRO_API_KEY");
 
   const userMessage = `Factoid A:
   title: ${input.titleA}

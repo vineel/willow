@@ -19,6 +19,7 @@
 
 import { mkdir } from "node:fs/promises";
 import { sql } from "../db";
+import { getSecret } from "../../pib/config";
 
 const APPLY = process.argv.includes("--apply");
 const ALL = process.argv.includes("--all");
@@ -243,8 +244,7 @@ async function callHaiku(
   system: string,
   userPrompt: string,
 ): Promise<Verdict> {
-  const apiKey = process.env.ANTHRO_API_KEY;
-  if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
+  const apiKey = await getSecret("ANTHRO_API_KEY");
 
   // Retry transient errors (429 rate limit, 529 overloaded, 503 unavailable)
   // with exponential backoff. Fail fast on 4xx client errors.

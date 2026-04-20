@@ -259,8 +259,7 @@ async function prefilter(
   email: JMAPEmail,
   bodyText: string | undefined,
 ): Promise<PrefilterVerdict> {
-  const apiKey = process.env.ANTHRO_API_KEY;
-  if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
+  const apiKey = await getSecret("ANTHRO_API_KEY");
 
   const res = await fetch(ANTHROPIC_URL, {
     method: "POST",
@@ -373,8 +372,7 @@ async function extractFacts(
   bodyText: string | undefined,
   model: "sonnet" | "opus",
 ): Promise<ExtractedFact[]> {
-  const apiKey = process.env.ANTHRO_API_KEY;
-  if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
+  const apiKey = await getSecret("ANTHRO_API_KEY");
 
   const modelId = model === "opus" ? OPUS_MODEL : SONNET_MODEL;
   const userPrompt = emailToPrompt(email, bodyText);

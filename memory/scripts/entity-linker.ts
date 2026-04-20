@@ -27,6 +27,7 @@
 
 import { mkdir } from "node:fs/promises";
 import { sql } from "../db";
+import { getSecret } from "../../pib/config";
 
 const APPLY = process.argv.includes("--apply");
 
@@ -192,8 +193,7 @@ interface Verdict {
 }
 
 async function callHaiku(prompt: string): Promise<Verdict> {
-  const apiKey = process.env.ANTHRO_API_KEY;
-  if (!apiKey) throw new Error("ANTHRO_API_KEY not set");
+  const apiKey = await getSecret("ANTHRO_API_KEY");
 
   const RETRYABLE = new Set([429, 503, 529]);
   const MAX_ATTEMPTS = 5;
