@@ -118,7 +118,11 @@ export function startWatcher(notesRoot: string, workerUtils: WorkerUtils) {
       for (const [path] of knownFiles) {
         if (!currentFiles.has(path)) {
           console.log(`[watcher] Removed file: ${path}`);
-          await deactivateNote(path);
+          try {
+            await deactivateNote(path);
+          } catch (err) {
+            console.error(`[watcher] deactivateNote failed for ${path}:`, err);
+          }
           removed++;
         }
       }
@@ -171,15 +175,14 @@ async function deactivateNote(filePath: string) {
 
   const sourceNoteId = existing[0].source_note_id;
 
-  const [result] = await sql`
+  const rows = await sql`
     UPDATE app.fact
     SET is_active = false, updated_at = now()
     WHERE source_note_id = ${sourceNoteId} AND is_active = true
-    RETURNING count(*) OVER () AS deactivated
+    RETURNING 1
   `;
 
-  const count = result?.deactivated ?? 0;
-  console.log(`[watcher] Deactivated ${count} facts for removed file: ${filePath}`);
+  console.log(`[watcher] Deactivated ${rows.count} facts for removed file: ${filePath}`);
 }
 
 export async function reconciliationScan(notesRoot: string, workerUtils: WorkerUtils) {
