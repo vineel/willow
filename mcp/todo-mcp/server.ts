@@ -55,7 +55,7 @@ server.tool(
 
     const parts = [`Added todo: "${todo.title}" (${todo.id})`];
     if (todo.priority !== "normal") parts.push(`Priority: ${todo.priority}`);
-    if (todo.due_date) parts.push(`Due: ${todo.due_date}`);
+    if (todo.due_date) parts.push(`Due: ${todo.due_date.toISOString().slice(0, 10)}`);
     if (tags && tags.length > 0) parts.push(`Tags: ${tags.join(", ")}`);
 
     return { content: [{ type: "text", text: parts.join("\n") }] };
