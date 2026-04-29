@@ -1,8 +1,10 @@
 /**
  * Portfolio Valuation Report — fetch quotes, calculate total, send notification.
  *
- * Usage: bun run pib:portfolio [variant]
+ * Usage: bun run pib:portfolio [variant] [--dry-run]
  *   variant: premarket | midday (default) | postclose
+ *   --dry-run: compute and print the total but skip sending the email
+ *              (use this for ad-hoc CLI lookups; the cron path always sends)
  */
 
 import { createLogger } from "../logger";
@@ -11,15 +13,19 @@ import type { ReportVariant } from "../portfolio/report";
 
 const log = createLogger("pib.portfolio");
 
-const arg = process.argv[2];
+const args = process.argv.slice(2);
+const dryRun = args.includes("--dry-run");
+const positional = args.filter((a) => !a.startsWith("--"));
 const validVariants: ReportVariant[] = ["premarket", "midday", "postclose"];
 const variant: ReportVariant =
-  arg && validVariants.includes(arg as ReportVariant) ? (arg as ReportVariant) : "midday";
+  positional[0] && validVariants.includes(positional[0] as ReportVariant)
+    ? (positional[0] as ReportVariant)
+    : "midday";
 
-log.runStart(`Portfolio valuation report (manual, ${variant})`);
+log.runStart(`Portfolio valuation report (manual, ${variant}${dryRun ? ", dry-run" : ""})`);
 
 try {
-  const result = await runPortfolioReport(variant);
+  const result = await runPortfolioReport(variant, { dryRun });
 
   const total = "$" + result.totalValue.toLocaleString("en-US", {
     minimumFractionDigits: 0,

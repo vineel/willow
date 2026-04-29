@@ -121,6 +121,7 @@ Then talk to it naturally:
 | `bun run pib:portfolio` | Fetch live quotes, value the portfolio, send a Mid-Day report to the willow folder |
 | `bun run pib:portfolio premarket` | Same, as Pre-Market report (no North Stars / Big Movers section) |
 | `bun run pib:portfolio postclose` | Same, as Post-Close report |
+| `bun run pib:portfolio -- --dry-run` | Compute and print the total without sending the report email (use for ad-hoc lookups) |
 
 The worker cron also runs this automatically on weekdays: 9:15 ET (pre-market), 12:30 ET (mid-day), 4:15 ET (post-close). Mid-day and post-close reports include a **North Stars** section (AAPL, NVDA always) and a **Big Movers** section (any held ticker with an absolute move >=2% vs. previous close).
 

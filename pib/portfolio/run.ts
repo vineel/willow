@@ -17,9 +17,11 @@ const POSITIONS_FILE =
  * Run the full portfolio valuation pipeline: parse → quote → valuate → notify.
  *
  * @param variant which scheduled run this is (controls whether movers are rendered)
+ * @param options.dryRun if true, skip sending the report email (CLI lookups)
  */
 export async function runPortfolioReport(
-  variant: ReportVariant = "midday"
+  variant: ReportVariant = "midday",
+  options: { dryRun?: boolean } = {}
 ): Promise<ValuationResult> {
   const holdings = parsePositions(POSITIONS_FILE);
   log.info(`Parsed ${holdings.length} holdings (${holdings.filter((h) => h.isCash).length} cash)`);
@@ -30,7 +32,11 @@ export async function runPortfolioReport(
   const quotes = await fetchQuotes(tickers);
   const result = valuatePortfolio(holdings, quotes);
 
-  await sendPortfolioReport(result, variant);
+  if (options.dryRun) {
+    log.info("Dry run — skipping report send");
+  } else {
+    await sendPortfolioReport(result, variant);
+  }
 
   return result;
 }
