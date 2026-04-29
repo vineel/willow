@@ -1,6 +1,6 @@
 {
   "name": "willow",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "type": "module",
   "scripts": {
     "dev": "bun run --watch bridge/server.ts",
@@ -55,7 +55,6 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@slack/bolt": "^4.7.0",
-    "chokidar": "^4.0.0",
     "fastify": "^5.3.3",
     "graphile-worker": "^0.16.0",
     "hono": "^4.7.0",
