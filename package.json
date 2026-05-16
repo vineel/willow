@@ -1,6 +1,6 @@
 {
   "name": "willow",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "type": "module",
   "scripts": {
     "dev": "bun run --watch bridge/server.ts",
@@ -31,6 +31,7 @@
     "mcp:web": "bun run --silent mcp/web-mcp/server.ts",
     "mcp:pipeline": "bun run --silent mcp/pipeline-mcp/server.ts",
     "mcp:todo": "bun run --silent mcp/todo-mcp/server.ts",
+    "mcp:gizmo": "bun run --silent mcp/gizmo-mcp/server.ts",
     "mcp:calendar": "bun run --silent mcp/calendar-mcp/server.ts",
     "mcp:slack-channel": "bun run --silent mcp/slack-channel/server.ts",
     "mcp:session": "bun run --silent mcp/session-mcp/server.ts",
@@ -50,7 +51,9 @@
     "cal:status": "bun run cal/scripts/cal-status.ts",
     "cal:migrate": "psql -d willow -f db/migrations/005-cal-tables.sql",
     "cal:migrate:write": "psql -d willow -f db/migrations/006-cal-write-support.sql",
-    "pib:portfolio": "bun run pib/scripts/portfolio-report.ts"
+    "pib:portfolio": "bun run pib/scripts/portfolio-report.ts",
+    "pib:portfolio:migrate": "psql -d willow -f db/migrations/011-portfolio-valuations.sql",
+    "pib:redispatch": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/redispatch-failed.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

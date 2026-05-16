@@ -122,8 +122,9 @@ Then talk to it naturally:
 | `bun run pib:portfolio premarket` | Same, as Pre-Market report (no North Stars / Big Movers section) |
 | `bun run pib:portfolio postclose` | Same, as Post-Close report |
 | `bun run pib:portfolio -- --dry-run` | Compute and print the total without sending the report email (use for ad-hoc lookups) |
+| `bun run pib:portfolio:migrate` | Run the portfolio_valuation table migration (one-time, for Week's Change snapshots) |
 
-The worker cron also runs this automatically on weekdays: 9:15 ET (pre-market), 12:30 ET (mid-day), 4:15 ET (post-close). Mid-day and post-close reports include a **North Stars** section (AAPL, NVDA always) and a **Big Movers** section (any held ticker with an absolute move >=2% vs. previous close).
+The worker cron also runs this automatically on weekdays: 9:15 ET (pre-market), 12:30 ET (mid-day), 4:15 ET (post-close). Mid-day and post-close reports include a **North Stars** section (AAPL, NVDA always) and a **Big Movers** section (any held ticker with an absolute move >=2% vs. previous close). Each non-dry run also writes a snapshot to `app.portfolio_valuation`; the **Post-Close** report renders a **Week's Change** section comparing today's total to the first pre-market snapshot of the current ET week (omitted if no pre-market snapshot exists yet for the week).
 
 ### Calendar
 
