@@ -356,7 +356,8 @@ async function runClaudeP(prompt: string, mcpConfigPath: string): Promise<string
     "--output-format", "json",
   ];
 
-  const proc = Bun.spawn(["claude", ...args], {
+  const claudeBin = process.env.WILLOW_CLAUDE_BIN ?? "claude";
+  const proc = Bun.spawn([claudeBin, ...args], {
     stdout: "pipe",
     stderr: "pipe",
     env: {

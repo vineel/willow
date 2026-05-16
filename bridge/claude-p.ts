@@ -33,7 +33,8 @@ export async function runClaudeP(
 
   const timeout = options.timeoutMs ?? config.claudeP.timeoutMs;
 
-  const proc = Bun.spawn(["claude", ...args], {
+  const claudeBin = process.env.WILLOW_CLAUDE_BIN ?? "claude";
+  const proc = Bun.spawn([claudeBin, ...args], {
     stdout: "pipe",
     stderr: "pipe",
     env: { ...process.env, PATH: `${process.env.HOME}/.bun/bin:${process.env.PATH}` },
