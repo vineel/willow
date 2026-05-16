@@ -11,7 +11,7 @@ import { syncSingleCalendar, getWillowCalendarId } from "../cal/sync";
 
 const calLog = createLogger("pib.action.calendar");
 
-const ACTION_TIMEOUT_MS = 120_000; // 2 minutes
+const ACTION_TIMEOUT_MS = 240_000; // 4 minutes
 
 interface ActionResult {
   success: boolean;
@@ -302,7 +302,7 @@ function composePrompt(
 /**
  * Write a temporary MCP config file with only the tools needed for action execution.
  */
-function writeMcpConfig(): string {
+export function writeMcpConfig(): string {
   const willow = "/Users/vineel/aidev/willow";
   const config = {
     mcpServers: {
@@ -326,6 +326,16 @@ function writeMcpConfig(): string {
         args: ["run", "--silent", `${willow}/mcp/todo-mcp/server.ts`],
         cwd: willow,
       },
+      "willow-gizmo": {
+        command: "/Users/vineel/.bun/bin/bun",
+        args: ["run", "--silent", `${willow}/mcp/gizmo-mcp/server.ts`],
+        cwd: willow,
+      },
+      "slack-channel": {
+        command: "/Users/vineel/.bun/bin/bun",
+        args: ["run", "--silent", `${willow}/mcp/slack-channel/server.ts`],
+        cwd: willow,
+      },
     },
   };
 
@@ -334,7 +344,7 @@ function writeMcpConfig(): string {
   return path;
 }
 
-async function runClaudeP(prompt: string, mcpConfigPath: string): Promise<string> {
+export async function runClaudeP(prompt: string, mcpConfigPath: string): Promise<string> {
   const args = [
     "-p", prompt,
     "--model", "sonnet",
@@ -342,7 +352,8 @@ async function runClaudeP(prompt: string, mcpConfigPath: string): Promise<string
     "--output-format", "json",
   ];
 
-  const proc = Bun.spawn(["claude", ...args], {
+  const claudeBin = process.env.WILLOW_CLAUDE_BIN ?? "claude";
+  const proc = Bun.spawn([claudeBin, ...args], {
     stdout: "pipe",
     stderr: "pipe",
     env: {

@@ -6,6 +6,8 @@ export const config = {
 
   channelHttpPort: 8788,
 
+  publicUrl: process.env.WILLOW_PUBLIC_URL ?? "http://terokNor.local:8787",
+
   projectRoot: resolve(import.meta.dir, ".."),
 
   pool: {

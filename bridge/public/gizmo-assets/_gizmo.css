@@ -1,0 +1,141 @@
+/*
+ * Gizmo stylesheet — modern CSS, no Tailwind.
+ * Semantic-HTML-leaning. Sonnet-generated content uses minimal class soup.
+ */
+
+@layer base, components;
+
+:root {
+  color-scheme: light dark;
+  --bg:       light-dark(#fafafa, #111);
+  --surface:  light-dark(#ffffff, #1a1a1a);
+  --fg:       light-dark(#1a1a1a, #f0f0f0);
+  --muted:    light-dark(#666666, #999999);
+  --accent:   light-dark(#2563eb, #60a5fa);
+  --border:   light-dark(#e5e5e5, #2a2a2a);
+  --success:  light-dark(#16a34a, #4ade80);
+  --warn:     light-dark(#b45309, #fbbf24);
+  --radius:   10px;
+  --space:    1rem;
+  --font:     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+              "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.5 var(--font);
+    padding: clamp(1rem, 4vw, 2rem);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main { max-width: 38rem; margin-inline: auto; }
+
+  header { margin-bottom: var(--space); }
+  h1 { font-size: clamp(1.4rem, 4vw, 1.8rem); margin: 0 0 0.25rem; }
+  h2 { font-size: 1.15rem; margin: 1.5rem 0 0.5rem; }
+  p  { margin: 0 0 0.75rem; }
+
+  fieldset { border: 0; padding: 0; margin: 0 0 var(--space); }
+  legend { font-weight: 600; margin-bottom: 0.5rem; padding: 0; }
+  label { display: block; cursor: pointer; }
+
+  input, button, textarea, select { font: inherit; color: inherit; }
+
+  input[type="text"], input[type="email"], input[type="url"],
+  input[type="number"], input[type="date"], input[type="time"],
+  textarea, select {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  textarea { min-height: 5rem; resize: vertical; }
+
+  button {
+    background: var(--accent);
+    color: white;
+    border: 0;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 600;
+    min-height: 44px;
+  }
+  button:hover { filter: brightness(1.05); }
+  button[type="button"].secondary {
+    background: var(--surface);
+    color: var(--fg);
+    border: 1px solid var(--border);
+  }
+
+  a { color: var(--accent); }
+}
+
+@layer components {
+  .checklist { list-style: none; padding: 0; margin: 0; }
+  .checklist li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    background: var(--surface);
+  }
+  .checklist li:has(input:checked) {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  }
+  .checklist label { flex: 1; cursor: pointer; }
+  .checklist input[type="checkbox"],
+  .checklist input[type="radio"] {
+    width: 1.25rem; height: 1.25rem; margin-top: 2px; accent-color: var(--accent);
+  }
+  .checklist .meta { color: var(--muted); font-size: 0.9em; display: block; }
+
+  .row { display: flex; gap: 0.75rem; align-items: center; }
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    padding: var(--space) 0 0;
+    background: linear-gradient(transparent, var(--bg) 30%);
+    display: flex;
+    gap: 0.75rem;
+    margin-top: var(--space);
+  }
+  .actions button { flex: 1; }
+
+  .notice {
+    padding: 1rem;
+    border-radius: var(--radius);
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+  .notice.success {
+    background: color-mix(in oklab, var(--success) 10%, transparent);
+    border-color: color-mix(in oklab, var(--success) 30%, transparent);
+  }
+  .notice.warn {
+    background: color-mix(in oklab, var(--warn) 10%, transparent);
+    border-color: color-mix(in oklab, var(--warn) 30%, transparent);
+  }
+
+  .meta-line { color: var(--muted); font-size: 0.9em; }
+
+  .controls { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .controls button[type="button"] {
+    background: var(--surface); color: var(--fg);
+    border: 1px solid var(--border); min-height: 36px;
+    padding: 0.4rem 0.75rem; font-weight: 500;
+  }
+}

@@ -19,6 +19,7 @@ import { etCronItems, inEasternHour } from "../lib/et-cron";
 import { runCalSync } from "../cal/sync";
 import { runCalExtraction } from "../cal/extract";
 import { runPortfolioReport } from "./portfolio/run";
+import { executeGizmoDispatch, sweepExpiredGizmos } from "./gizmo-dispatch";
 
 const log = createLogger("pib.worker");
 const FOLDERS_TO_SYNC = ["inbox", "for-willow", "not-for-willow", "Ai Buzz"];
@@ -82,6 +83,30 @@ const tasks: TaskList = {
       log.error(`Calendar sync failed: ${(err as Error).message}`);
     }
   },
+
+  async gizmo_dispatch(payload, _helpers) {
+    const slug = (payload as { slug?: string })?.slug;
+    if (!slug) {
+      log.error("gizmo_dispatch missing slug");
+      return;
+    }
+    log.runStart(`Gizmo dispatch: ${slug}`);
+    try {
+      await executeGizmoDispatch(slug);
+    } catch (err) {
+      log.error(`Gizmo dispatch failed: ${(err as Error).message}`);
+      throw err;
+    }
+  },
+
+  async gizmo_sweep(_payload, _helpers) {
+    try {
+      const expired = await sweepExpiredGizmos();
+      if (expired > 0) log.info(`Gizmo sweep: ${expired} expired`);
+    } catch (err) {
+      log.error(`Gizmo sweep failed: ${(err as Error).message}`);
+    }
+  },
 };
 
 const crontab = parseCronItems([
@@ -131,6 +156,11 @@ const crontab = parseCronItems([
     task: "cal_sync",
     match: "*/30 * * * *",
     identifier: "cal_sync_cron",
+  },
+  {
+    task: "gizmo_sweep",
+    match: "0 * * * *",
+    identifier: "gizmo_sweep_cron",
   },
 ]);
 
