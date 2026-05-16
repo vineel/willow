@@ -7,6 +7,7 @@ import { parsePositions } from "./positions";
 import { fetchQuotes } from "./quotes";
 import { valuatePortfolio, type ValuationResult } from "./valuate";
 import { sendPortfolioReport, type ReportVariant } from "./report";
+import { recordValuation } from "./storage";
 
 const log = createLogger("pib.portfolio");
 
@@ -35,6 +36,7 @@ export async function runPortfolioReport(
   if (options.dryRun) {
     log.info("Dry run — skipping report send");
   } else {
+    await recordValuation(variant, result);
     await sendPortfolioReport(result, variant);
   }
 

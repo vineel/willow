@@ -7,6 +7,7 @@ import { getSession, getMailboxes } from "../jmap/session";
 import { sendNotification } from "../jmap/notify";
 import { createLogger } from "../logger";
 import type { ValuationResult, TickerMove } from "./valuate";
+import { getWeekBaselinePremarket } from "./storage";
 
 const log = createLogger("pib.portfolio.report");
 
@@ -20,6 +21,21 @@ const VARIANT_LABEL: Record<ReportVariant, string> = {
 
 function formatCurrency(n: number): string {
   return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function formatSignedCurrency(n: number): string {
+  const sign = n >= 0 ? "+" : "−";
+  const abs = Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  return `${sign}$${abs}`;
+}
+
+function formatBaselineDateET(ts: Date): string {
+  return ts.toLocaleDateString("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function formatPrice(n: number): string {
@@ -86,6 +102,17 @@ export async function sendPortfolioReport(
   const label = VARIANT_LABEL[variant];
   const showMovers = variant !== "premarket";
 
+  const weekBaseline =
+    variant === "postclose" ? await getWeekBaselinePremarket() : null;
+  const weekChange = weekBaseline
+    ? {
+        baselineValue: weekBaseline.totalValue,
+        baselineDate: formatBaselineDateET(weekBaseline.ts),
+        delta: result.totalValue - weekBaseline.totalValue,
+        pct: ((result.totalValue - weekBaseline.totalValue) / weekBaseline.totalValue) * 100,
+      }
+    : null;
+
   const subject = `Willow: Portfolio ${label} — ${dateShort}, ${time} ET`;
 
   const textLines = [
@@ -94,6 +121,16 @@ export async function sendPortfolioReport(
     "",
     `Total Portfolio Value: ${total}`,
   ];
+
+  if (weekChange) {
+    textLines.push(
+      "",
+      "Week's Change",
+      "-------------",
+      `Baseline (${weekChange.baselineDate} pre-market): ${formatCurrency(weekChange.baselineValue)}`,
+      `Change: ${formatSignedCurrency(weekChange.delta)} (${weekChange.pct >= 0 ? "+" : ""}${weekChange.pct.toFixed(2)}%)`
+    );
+  }
 
   if (showMovers && result.northStars.length > 0) {
     textLines.push("", "North Stars", "-----------");
@@ -115,6 +152,20 @@ export async function sendPortfolioReport(
 
   const bodyText = textLines.join("\n");
 
+  const weekChangeHtml = weekChange
+    ? (() => {
+        const up = weekChange.delta >= 0;
+        const color = up ? "#0a7a3a" : "#b00020";
+        const arrow = up ? "▲" : "▼";
+        const pctStr = `${up ? "+" : ""}${weekChange.pct.toFixed(2)}%`;
+        return `<h2 style="margin:24px 0 8px;font-size:16px">Week's Change</h2>
+  <div style="font-family:system-ui,sans-serif">
+    <div style="color:#666;font-size:0.9em">Baseline: ${weekChange.baselineDate} pre-market — ${formatCurrency(weekChange.baselineValue)}</div>
+    <div style="margin-top:4px;color:${color};font-size:1.1em;font-weight:600">${arrow} ${formatSignedCurrency(weekChange.delta)} (${pctStr})</div>
+  </div>`;
+      })()
+    : "";
+
   const northStarsHtml = showMovers && result.northStars.length > 0
     ? `<h2 style="margin:24px 0 8px;font-size:16px">North Stars</h2>${result.northStars.map(formatMoveHtml).join("")}`
     : "";
@@ -131,6 +182,7 @@ export async function sendPortfolioReport(
   <p style="color:#666;margin:0">Date: ${dateLong}</p>
   <p style="color:#666;margin:0">Time: ${time} ET (${label})</p>
   <h1 style="margin:16px 0;font-size:32px">${total}</h1>
+  ${weekChangeHtml}
   ${northStarsHtml}
   ${bigMoversHtml}
   ${result.missing.length > 0 ? `<p style="color:#999;font-size:0.9em;margin-top:24px">Could not price: ${result.missing.join(", ")}</p>` : ""}
