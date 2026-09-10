@@ -61,7 +61,9 @@ function mondayStartOfWeekET(now: Date = new Date()): Date {
     mondayDateFmt.formatToParts(new Date(mondayNoonUtc)).map((p) => [p.type, p.value])
   );
 
-  return new Date(`${mp.year}-${mp.month}-${mp.day}T05:00:00Z`);
+  const month = String(mp.month).padStart(2, "0");
+  const day = String(mp.day).padStart(2, "0");
+  return new Date(`${mp.year}-${month}-${day}T05:00:00Z`);
 }
 
 /**

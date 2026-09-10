@@ -29,8 +29,12 @@ function formatSignedCurrency(n: number): string {
   return `${sign}$${abs}`;
 }
 
-function formatBaselineDateET(ts: Date): string {
-  return ts.toLocaleDateString("en-US", {
+function formatBaselineDateET(ts: Date | string): string {
+  const date = ts instanceof Date ? ts : new Date(ts);
+  if (Number.isNaN(date.getTime())) {
+    return "this week";
+  }
+  return date.toLocaleDateString("en-US", {
     timeZone: "America/New_York",
     weekday: "short",
     month: "short",

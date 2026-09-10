@@ -164,7 +164,7 @@ const crontab = parseCronItems([
     task: "portfolio_report",
     identifier: "portfolio_postclose_cron",
     hour: 16,
-    minute: 15,
+    minute: 35,
     dayOfWeek: "1-5",
     payload: { variant: "postclose" },
   }),
@@ -207,7 +207,7 @@ async function main() {
     parsedCronItems: crontab,
   });
 
-  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 6:45am ET M-F / 8am ET Sat-Sun, portfolio 9:15/12:30/16:15 ET M-F, cal_sync */30min, foldersort_scan_sent 4:30am ET daily");
+  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 6:45am ET M-F / 8am ET Sat-Sun, portfolio 9:15/12:30/16:35 ET M-F, cal_sync */30min, foldersort_scan_sent 4:30am ET daily");
 
   const shutdown = async () => {
     log.info("Shutting down...");

@@ -53,6 +53,7 @@
     "cal:migrate": "psql -d willow -f db/migrations/005-cal-tables.sql",
     "cal:migrate:write": "psql -d willow -f db/migrations/006-cal-write-support.sql",
     "pib:portfolio": "bun run pib/scripts/portfolio-report.ts",
+    "pib:portfolio:detail": "bun run pib/scripts/portfolio-detail.ts",
     "pib:portfolio:migrate": "psql -d willow -f db/migrations/011-portfolio-valuations.sql",
     "pib:redispatch": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/redispatch-failed.ts",
     "foldersort:scan-sent": "bun run pib/scripts/foldersort-scan-sent.ts",
