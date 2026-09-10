@@ -76,9 +76,11 @@ const ingestNote: Task = async (payload, helpers) => {
     const localMsg = localErr instanceof Error ? localErr.message : String(localErr);
     // Categorize the failure
     const reason = localMsg.includes("timed out") ? "timeout"
-      : localMsg.includes("context length") ? "too_large"
+      : localMsg.includes("context length") || localMsg.includes("Context size has been exceeded") ? "too_large"
       : localMsg.includes("JSON") || localMsg.includes("Parse") ? "bad_json"
-      : localMsg.includes("No models loaded") ? "model_unloaded"
+      : localMsg.includes("No models loaded")
+        || localMsg.includes("Model is unloaded")
+        || localMsg.includes("Failed to load model") ? "model_unloaded"
       : "unknown";
     console.log(`[ingest] LOCAL_FAIL ${short} — ${reason}: ${localMsg}`);
 
