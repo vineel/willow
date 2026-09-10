@@ -1,6 +1,6 @@
 {
   "name": "willow",
-  "version": "0.8.0",
+  "version": "0.9.1",
   "type": "module",
   "scripts": {
     "dev": "bun run --watch bridge/server.ts",

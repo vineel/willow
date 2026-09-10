@@ -158,6 +158,7 @@ export function groupDigestItems(items: DigestItem[]): DigestGroup[] {
 export function formatDigestText(groups: DigestGroup[], count: number, todos: TodoItem[]): string {
   const lines: string[] = [];
   lines.push(`Willow Digest — ${count} item${count !== 1 ? "s" : ""}${todos.length > 0 ? `, ${todos.length} todo${todos.length !== 1 ? "s" : ""}` : ""}\n`);
+  lines.push(`Mail sort log: ${PUBLIC_URL}/mail-log\n`);
 
   if (todos.length > 0) {
     lines.push(`\n## Pending Todos (${todos.length})\n`);
@@ -255,7 +256,8 @@ export function formatDigestHtml(groups: DigestGroup[], count: number, todos: To
 
   const subtitle = todos.length > 0 ? `, ${todos.length} todo${todos.length !== 1 ? "s" : ""}` : "";
   return `<div style="font-family:system-ui,sans-serif;max-width:600px">
-    <h2>Willow Digest — ${count} item${count !== 1 ? "s" : ""}${subtitle}</h2>
+    <h2 style="margin-bottom:4px">Willow Digest — ${count} item${count !== 1 ? "s" : ""}${subtitle}</h2>
+    <p style="margin:0 0 16px"><a href="${PUBLIC_URL}/mail-log" style="color:#1a73e8;text-decoration:none;font-size:0.9em">See how every email was sorted →</a></p>
     ${todoSection}
     ${sections}
   </div>`;

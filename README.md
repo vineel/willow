@@ -232,6 +232,15 @@ Fastmail inbox
 | `for-willow` | Drop an email here to process it and permanently allowlist the sender. |
 | `not-for-willow` | Drop an email here to permanently blocklist the sender. |
 
+## Mail sort log
+
+Every email the pipeline touches, newest first — sender, folder it landed in (or "Inbox"), a short body preview, and a link to open it in Fastmail. Reads live from `app.fact` / `app.source_note`, so it grows automatically as the pipeline runs; nothing to run manually. Linked at the top of every daily digest.
+
+- HTML: `http://<host>:8787/mail-log` — has a search box; typing a few words matches any email containing any of them (sender, subject, body, folder, or classification), with hits highlighted
+- JSON (for Willow to query directly, e.g. via `web_fetch`): `http://<host>:8787/mail-log.json?q=word1+word2&limit=N` (`limit` defaults to 300, or 1000 when `q` is set; max 2000)
+
+Source: `bridge/routes/mail-log.ts`.
+
 ## Logs
 
 Everything logs to `/tmp/willow-runtime.log` in a parseable format:
