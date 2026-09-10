@@ -22,7 +22,11 @@ await fastify.register(gizmoRoutes);
 await fastify.register(mailRoutes);
 await fastify.register(mailLogRoutes);
 
-await pool.start();
+if (process.env.WILLOW_BRIDGE_POOL !== "0") {
+  await pool.start();
+} else {
+  fastify.log.info("Session pool disabled via WILLOW_BRIDGE_POOL=0 — chat/agent endpoints will not function");
+}
 
 await fastify.listen({ port: config.port, host: config.host });
 fastify.log.info(`Bridge server listening on ${config.host}:${config.port}`);
