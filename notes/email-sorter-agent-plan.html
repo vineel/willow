@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Foldersort agent — plan</title>
+<style>
+  :root {
+    --fg: #1f2328; --muted: #57606a; --bg: #ffffff; --border: #d0d7de;
+    --code-bg: #f6f8fa; --link: #0969da; --table-stripe: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #e6edf3; --muted: #8b949e; --bg: #0d1117; --border: #30363d;
+            --code-bg: #161b22; --link: #58a6ff; --table-stripe: #161b22; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  main { max-width: 880px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1, h2, h3, h4 { font-weight: 600; line-height: 1.25; margin-top: 1.8em; margin-bottom: 0.6em; }
+  h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 0; }
+  h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+  h3 { font-size: 1.2em; }
+  h4 { font-size: 1.0em; color: var(--muted); }
+  p, ul, ol, blockquote, table, pre { margin: 0.8em 0; }
+  ul, ol { padding-left: 1.6em; }
+  li { margin: 0.25em 0; }
+  blockquote { color: var(--muted); border-left: 3px solid var(--border); padding-left: 1em; margin-left: 0; }
+  code { background: var(--code-bg); padding: 0.15em 0.35em; border-radius: 4px;
+    font: 13px/1.45 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto;
+    border: 1px solid var(--border); }
+  pre code { background: transparent; padding: 0; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  tr:nth-child(2n) td { background: var(--table-stripe); }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+  .meta { color: var(--muted); font-size: 0.85em; margin-top: -1em; }
+</style>
+</head>
+<body>
+<main>
+<h1>Foldersort agent — rules and classifiers conceptual model</h1>
+<h2>Context</h2>
+<p>Vineel wants a new Willow agent that sorts incoming Fastmail messages out of the inbox into subfolders. Mechanically: deterministic rules first, LLM judgment (LM Studio / <code>google/gemma-4-e4b</code>) on everything else. Conceptually: the catalog of rules and folder definitions must be <strong>growable by talking to Willow</strong> — same way <code>willow-triage</code> and <code>willow-interests</code> already grow.</p>
+<p><strong>Key framing decisions (confirmed with user):</strong></p>
+<ul>
+<li><strong>Targets are subfolders of an existing <code>willow-secondary</code> folder in Fastmail</strong>, not arbitrary mailboxes. The inbox is the &quot;important stuff&quot; set; sorting = moving things <em>away</em> from the inbox into the right subfolder.</li>
+<li><strong>&quot;Leave in inbox&quot; is the dominant outcome</strong>, not an edge case. The classifier should err on the side of leaving things in place.</li>
+<li><strong>Backfill is a v0 deliverable</strong>: 1-day backfill for testing, then 7-day backfill once ready. CLI driven, proposal-only.</li>
+<li><strong>Source of truth for rules is table-backed</strong> (<code>folder_profile</code> + <code>folder_rule</code>), with prose-feeling MCP edits.</li>
+</ul>
+<p>He has prior notes at <code>~/aidev/willow/working-on-spam-filter.md</code> with strong staged-rollout discipline (&quot;moving/deleting email is irreversible-feeling&quot;). The current pipeline is read-only — this will be Willow&#39;s first write-back-to-mail capability.</p>
+<p>This plan covers the full v0 build (rules + classifier + bootstrap + dry-run + backfill + proposal mode). Approval/auto-apply phases and daily-sweep are referenced but deferred to post-v0.</p>
+<hr>
+<h2>The three concepts</h2>
+<h3>1. Folder profile — the catalog entry per folder</h3>
+<p>The LLM can&#39;t pick a folder it doesn&#39;t know about. Each subfolder of <code>willow-secondary</code> gets a profile — a small natural-language record that teaches the LLM what belongs there. Profiles are the <strong>source of truth for the folder taxonomy.</strong></p>
+<p>Shape (DB-backed but prose-feeling in MCP tools):</p>
+<pre><code class="language-sql">CREATE TABLE app.folder_profile (
+  name              text PRIMARY KEY,        -- subfolder leaf name under willow-secondary
+  mailbox_id        text,                    -- resolved JMAP id; refreshed on bootstrap
+  parent_path       text DEFAULT &#39;willow-secondary&#39;,
+  description       text NOT NULL,           -- one-line shown to LLM
+  llm_hint          text,                    -- longer guidance, optional
+  example_subjects  text[] DEFAULT &#39;{}&#39;,     -- corrective-feedback exemplars
+  example_senders   text[] DEFAULT &#39;{}&#39;,     -- ditto
+  enabled           boolean DEFAULT true,
+  created_at        timestamptz DEFAULT now(),
+  updated_at        timestamptz DEFAULT now()
+);
+</code></pre>
+<p><code>mailbox_id</code> is cached for fast move-application; refresh on bootstrap / mailbox-not-found error. Reasoning for table-not-markdown: matches <code>app.interest</code> (description + keywords[] + action_prompt) — already-proven shape for mixing prose and structure. The MCP UX still feels prose-y: <code>create_profile(name, description, llm_hint)</code> reads exactly like dictating a paragraph.</p>
+<h3>2. Folder rule — deterministic shortcut</h3>
+<p>For the obvious cases (&quot;everything from spotify.com → Subscriptions&quot;) the LLM is overkill. A <code>folder_rule</code> table parallel to <code>triage_rule</code> uses the same field/operator vocabulary and engine, but its action is always &quot;move to folder X&quot;:</p>
+<pre><code class="language-sql">CREATE TABLE app.folder_rule (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name            text NOT NULL,
+  field           text NOT NULL,          -- same as triage_rule
+  operator        text NOT NULL CHECK (operator IN (&#39;equals&#39;,&#39;contains&#39;,&#39;starts_with&#39;,&#39;ends_with&#39;,&#39;regex&#39;,&#39;exists&#39;,&#39;gte&#39;)),
+  value           text,
+  header_name     text,
+  target_folder   text NOT NULL REFERENCES app.folder_profile(name),
+  priority        integer DEFAULT 100,
+  enabled         boolean DEFAULT true,
+  confirmed       boolean DEFAULT false,
+  source          text NOT NULL CHECK (source IN (&#39;system&#39;,&#39;user&#39;,&#39;agent&#39;)),
+  created_at      timestamptz DEFAULT now(),
+  updated_at      timestamptz DEFAULT now()
+);
+</code></pre>
+<p>Reuse <code>matchOperator()</code> and <code>extractFieldValue()</code> from <code>pib/triage/engine.ts:9-80</code> directly — they&#39;re field-agnostic. Same first-match-wins semantics.</p>
+<p><strong>Why a parallel table instead of extending <code>triage_rule</code>:</strong> <code>triage_action</code> (<code>noise|digest|queue|flag</code>) and <code>target_folder</code> are orthogonal decisions. A message can simultaneously be <code>triage_action=queue</code> AND <code>target_folder=Receipts</code>. Conflating into one engine means a <code>queue</code> rule below a <code>move_to_folder</code> rule never fires. Kept separate, both engines run cleanly.</p>
+<h3>3. Decision record — column on <code>fact</code>, not a new table</h3>
+<p>The &quot;what did we decide for this email&quot; record lives as columns on <code>app.fact</code>, mirroring the existing <code>triage_action</code>/<code>triage_source</code>/<code>triage_rule_id</code> pattern at <code>db/schema.sql:103</code>:</p>
+<pre><code class="language-sql">ALTER TABLE app.fact ADD COLUMN folder_target text;
+ALTER TABLE app.fact ADD COLUMN folder_decided_by text CHECK (folder_decided_by IN (&#39;rule&#39;,&#39;llm&#39;,&#39;default&#39;,&#39;skip&#39;));
+ALTER TABLE app.fact ADD COLUMN folder_rule_id uuid REFERENCES app.folder_rule(id);
+ALTER TABLE app.fact ADD COLUMN folder_proposed_at timestamptz;
+ALTER TABLE app.fact ADD COLUMN folder_applied_at timestamptz;
+ALTER TABLE app.fact ADD COLUMN folder_error text;
+</code></pre>
+<p>Co-locates triage and foldersort decisions; lets the digest section &quot;what got proposed today&quot; be one query.</p>
+<hr>
+<h2>The classifier (LLM as judge)</h2>
+<p>Copy the prompt pattern from <code>pib/classify.ts:50-86</code> directly. The only thing that changes is the taxonomy:</p>
+<ol>
+<li>Load enabled folder profiles. Expected count is small (~10-20 subfolders under <code>willow-secondary</code>) — <strong>no prefilter needed for v0</strong>. Revisit if the count grows past ~25.</li>
+<li><strong><code>leave_in_inbox</code> is always in the enum AND is the explicit default.</strong> Prompt should say &quot;If you are not confident a message belongs in one of these folders, choose <code>leave_in_inbox</code>. The inbox is for important and uncategorized mail; it is correct to leave a lot of mail there.&quot;</li>
+<li>Format profiles one-line each (<code>Receipts: order confirmations, shipping notices, store purchase receipts</code>). NO <code>example_subjects</code> in the prompt body — those grow via corrective feedback but don&#39;t go to LLM at decision time, to keep the prompt short.</li>
+<li>Pass through <code>chatCompletion()</code> (<code>memory/lmstudio/client.ts</code>) with strict json_schema requiring <code>{ selected_folder: string, reason: string }</code>. The schema&#39;s enum is <code>profile_names + [&quot;leave_in_inbox&quot;]</code>. Gemma cannot emit anything else. <code>reason</code> is a one-sentence rationale captured in the decision log for review.</li>
+<li><code>temperature: 0.1</code> (same as <code>pib/classify.ts:107</code>).</li>
+</ol>
+<p>Confidence is intentionally ignored — local Gemma always reports 0.9. The single gate is <strong>enum validity</strong> (tautological under strict schema). The conservative-default bias is built into the prompt, not the gating logic.</p>
+<hr>
+<h2>Growth-by-conversation — three mechanisms</h2>
+<p>The whole point of this design is the catalog grows by talking to Willow. A new MCP server <code>willow-foldersort</code> exposes these tools (mirroring <code>willow-triage</code> / <code>willow-interests</code> shape):</p>
+<h3>A. Add a folder profile</h3>
+<blockquote>
+<p>&quot;I made a folder called Receipts. It&#39;s for order confirmations, shipping notices, and store purchase receipts.&quot;</p>
+</blockquote>
+<p>→ <code>create_profile(name=&quot;Receipts&quot;, description=&quot;order confirmations, shipping notices, store purchase receipts&quot;, llm_hint=null)</code>.</p>
+<p>Verify the named folder exists in Fastmail (<code>getMailboxes()</code> from <code>pib/jmap/session.ts:42</code>). If not, surface the mismatch — don&#39;t auto-create folders.</p>
+<h3>B. Add a deterministic rule</h3>
+<blockquote>
+<p>&quot;Always put email from spotify.com into Subscriptions.&quot;</p>
+</blockquote>
+<p>→ <code>add_folder_rule(field=&quot;from_domain&quot;, operator=&quot;equals&quot;, value=&quot;spotify.com&quot;, target_folder=&quot;Subscriptions&quot;, source=&quot;user&quot;, priority=1)</code>.</p>
+<p>The rule from a <strong>specific Fastmail URL</strong> is the most ergonomic flow. The recently-built <code>fastmail-mcp.fetch_email(url)</code> (Bridge <code>POST /mail/get</code>) gives us subject + from + headers from a single URL. Mirror it: <code>add_folder_rule_from_url(url, target_folder, kind=&quot;sender&quot;|&quot;domain&quot;|&quot;subject_contains&quot;)</code> resolves the URL, extracts the matching field, creates the rule.</p>
+<h3>C. Correct a misplacement</h3>
+<blockquote>
+<p>&quot;This went to X but should have gone to Receipts.&quot; (paste URL or reference fact_id)</p>
+</blockquote>
+<p>→ <code>correct_placement(email_ref, target_folder, reason?)</code> runs this decision tree against the <code>fact</code> row:</p>
+<ol>
+<li><strong>If <code>folder_decided_by=&#39;rule&#39;</code></strong> → the rule mis-fired. Set the offending rule <code>enabled=false</code> (demote, don&#39;t delete — easier to recover) AND add the email&#39;s subject/sender to the <strong>correct</strong> profile&#39;s <code>example_subjects</code>/<code>example_senders</code>.</li>
+<li><strong>If <code>folder_decided_by=&#39;llm&#39;</code> AND this sender has been corrected toward the same target ≥3 times in the last 90 days</strong> → write a new high-priority <code>folder_rule</code> (<code>from_address equals X → target</code>), <code>source=&#39;agent&#39;</code>, <code>confirmed=true</code>.</li>
+<li><strong>If <code>folder_decided_by=&#39;llm&#39;</code> (sporadic)</strong> → append to <code>example_subjects</code> on the target profile only. No new rule.</li>
+<li><strong>If <code>folder_decided_by=&#39;default&#39;</code></strong> → either prompt to <code>create_profile</code> (target doesn&#39;t exist) or append exemplars.</li>
+</ol>
+<p><code>llm_hint</code> is updated only on explicit user instruction (<code>update_profile(name, llm_hint=…)</code>), never on individual corrections — avoids hint drift from one-off cases.</p>
+<p>After applying the corrective record, re-run foldersort against a fresh fetch of the same email (dry-run only) to confirm the next decision would be correct.</p>
+<h3>Tool surface (full list)</h3>
+<pre><code>list_profiles
+create_profile(name, description, llm_hint?, example_subjects?, example_senders?)
+update_profile(name, description?, llm_hint?)            -- prose-y edits
+disable_profile(name)
+list_folder_rules(target_folder?)
+add_folder_rule(field, operator, value, target_folder, priority?)
+add_folder_rule_from_url(url, target_folder, kind)       -- uses fastmail-mcp pattern
+disable_folder_rule(id)
+test_foldersort(url | id | fact_id)                      -- dry-run, full path
+preview_inbox_sort(count?, source?)                      -- chat-displayable batch dry-run, see below
+correct_placement(email_ref, target_folder, reason?)
+add_correspondent(email, note?)                          -- &quot;I know X now&quot;
+remove_correspondent(email)                              -- inverse of above
+list_correspondents(contains?)                           -- filtered inspection
+</code></pre>
+<h3>Chat-driven preview-and-correct flow</h3>
+<p><code>preview_inbox_sort(count=20, source=&quot;recent_ingested&quot; | &quot;since_last_preview&quot;)</code> returns a compact text block formatted for in-chat display: N recent inbox emails with their proposed sort destination, the reasoning, and a <code>fact_id</code> short reference for follow-up corrections.</p>
+<p>Output shape (one block per email, easy to scan in Claude Code / Codex chat):</p>
+<pre><code>#1  [fact:7c4a]   2026-05-23
+    From:     Amazon.com &lt;auto-confirm@amazon.com&gt;
+    Subject:  Your Amazon order has shipped: &quot;kindle paperwhite&quot;
+    →         uninteresting   (rule:amazon-shipping)
+
+#2  [fact:a39e]   2026-05-23
+    From:     Nate B. Jones &lt;nate@natebjones.substack.com&gt;
+    Subject:  The unbundling of search and the new content economy
+    →         my-reading      (rule:substack-nate)
+
+#3  [fact:4d11]   2026-05-23
+    From:     Mary Smith &lt;mary.smith@gmail.com&gt;
+    Subject:  Are you free Saturday?
+    →         leave_in_inbox  (llm: appears to be personal correspondence;
+                              sender is in the known correspondent list)
+
+…
+</code></pre>
+<p>Corrections in the same chat conversation:</p>
+<blockquote>
+<p>&quot;Change #3 to people-i-don&#39;t-know&quot;  → agent calls <code>correct_placement(fact_id=&quot;7c4a-…full&quot;, target_folder=&quot;people-i-don&#39;t-know&quot;)</code> against the underlying fact.</p>
+</blockquote>
+<p>Or by reference to the email:</p>
+<blockquote>
+<p>&quot;Move the Amazon one to leave_in_inbox&quot;  → agent resolves &quot;the Amazon one&quot; to fact_id from the preview output, then calls <code>correct_placement</code>.</p>
+</blockquote>
+<p>The preview output also writes proposals to the <code>fact</code> row (same columns as backfill) so subsequent listings don&#39;t repeat the same emails — that&#39;s the <code>source=&quot;since_last_preview&quot;</code> default once a <code>previewed_at</code> column is added. For v0 simplicity, <code>source=&quot;recent_ingested&quot;</code> (default 20 most recent ingested-but-not-yet-proposed inbox messages) is fine.</p>
+<p>Mirrored CLI: <code>bun run foldersort:preview -- --count 20</code> prints the same blocks to terminal. Useful for spot-checks outside chat.</p>
+<hr>
+<h2>Bootstrap flow (v0)</h2>
+<p><code>bun run foldersort:bootstrap</code> does the following, idempotently:</p>
+<ol>
+<li>JMAP-fetch all mailboxes (extending <code>getMailboxes()</code> to also return <code>parentId</code>).</li>
+<li>Find the <code>willow-secondary</code> mailbox by name.</li>
+<li>Enumerate its direct children.</li>
+<li>For each subfolder: upsert a row into <code>folder_profile</code> with <code>name=&lt;leaf name&gt;</code>, <code>mailbox_id=&lt;jmap id&gt;</code>. Existing description / llm_hint / examples are preserved.</li>
+<li>On first run, seed descriptions from the seed-taxonomy table below (so the user doesn&#39;t have to hand-fill them). On subsequent runs, only add new folders; don&#39;t overwrite edits.</li>
+<li>Print a table of profiles with empty descriptions for the user to fill in via <code>update_profile</code> MCP.</li>
+</ol>
+<p>This handles renames/moves too: re-running picks up the latest <code>mailbox_id</code> and any new subfolders.</p>
+<h3>Seed taxonomy (v0)</h3>
+<p>The bootstrap script seeds these descriptions on first run. The user&#39;s <code>update_profile</code> MCP can refine them at any time. Seed senders are inserted as <code>example_senders</code> and also become high-priority <code>folder_rule</code> rows (<code>source=&#39;system&#39;, confirmed=false</code>) so they fire deterministically without burning an LLM call.</p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Seed description (LLM prompt line)</th>
+<th>Seed senders → rules</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>uninteresting</code></td>
+<td>repeated transactional emails, marketing from companies the user does not care about, generic notifications, mundane stuff</td>
+<td>(none — LLM only)</td>
+<td>catch-all; LLM should still prefer <code>leave_in_inbox</code> if uncertain</td>
+</tr>
+<tr>
+<td><code>marketing-interesting</code></td>
+<td>marketing about things the user might care about — concerts, AI lab updates, music/movie festivals, books, niche commerce</td>
+<td>spotify.com, anthropic.com, openai.com, visasq.com, zenni.com; amazon &quot;Top Kindle Books&quot; subject pattern</td>
+<td>amazon.com is split: kindle/recommendation subjects here, order confirmations should stay in inbox or land in <code>uninteresting</code></td>
+</tr>
+<tr>
+<td><code>zeph-college</code></td>
+<td>college and university outreach to Zeph or any student in the household — admissions, campus visits, applications</td>
+<td>(none)</td>
+<td>LLM should look for <code>.edu</code> domains + admissions/college language</td>
+</tr>
+<tr>
+<td><code>maybe-spam</code></td>
+<td>likely spam, political outreach, PAC and campaign mail</td>
+<td>(none)</td>
+<td>overlaps with triage <code>noise</code> action; foldersort still proposes here so the user can review rather than silently discarding</td>
+</tr>
+<tr>
+<td><code>my-reading</code></td>
+<td>newsletters and reading-list content the user reads regularly — Substack, Business Insider, Alley Watch</td>
+<td>substack.com (specifically Nate B Jones), businessinsider.com, alleywatch.com</td>
+<td>many substacks come from custom domains; rules will need iterative expansion</td>
+</tr>
+<tr>
+<td><code>people-i-don&#39;t-know</code></td>
+<td>mail from an actual individual person whom the user hasn&#39;t corresponded with recently</td>
+<td>(none — heuristic only)</td>
+<td><strong>see v0 limitation below</strong></td>
+</tr>
+<tr>
+<td><code>vineel-curated</code></td>
+<td>(managed externally by a Fastmail rule on <code>To: curated@vineel.com</code>)</td>
+<td>n/a</td>
+<td><strong>disabled in the foldersort enum</strong> — never an LLM target</td>
+</tr>
+</tbody></table>
+<h3>Special handling</h3>
+<ol>
+<li><p><strong><code>vineel-curated</code> is excluded from the LLM enum.</strong> A Fastmail server-side rule already routes mail addressed to <code>curated@vineel.com</code> here. The profile exists in the DB for completeness but is created with <code>enabled=false</code>. The LLM never sees it as an option; foldersort decisions are blind to it. Mail that Fastmail already routed there won&#39;t enter the inbox in the first place.</p>
+</li>
+<li><p><strong><code>people-i-don&#39;t-know</code> uses a sent-mail correspondent list as the primary signal.</strong> The strict semantic — &quot;actual individual, not responded to in the last year&quot; — is supported by a maintained correspondent list (see next section). The foldersort decision flow then becomes:</p>
+<ul>
+<li>Sender appears to be an individual (has a plausible person-name, not &quot;noreply&quot;/&quot;updates&quot;/etc., no <code>List-Unsubscribe</code> header).</li>
+<li><code>from_address</code> is NOT in the correspondent list (the strong signal).</li>
+<li>LLM prompt is told this is the rule and given the freedom to fall back to <code>leave_in_inbox</code> if the message is clearly important regardless.</li>
+<li><strong>Maintenance</strong>: an initial one-year bootstrap scan + a daily incremental scan keep the list fresh automatically. A manual MCP tool lets Vineel whitelist new contacts on demand (&quot;I know <a href="mailto:brent@wakes.com">brent@wakes.com</a> now&quot;).</li>
+</ul>
+</li>
+</ol>
+<h3>Sent-mail correspondent list (v0)</h3>
+<p><strong><code>app.correspondent</code> is the source of truth</strong>; <code>~/aidev/willow/data/correspondents.txt</code> is an auto-regenerated audit artifact (sorted dump of every address in the table) refreshed after every scan and after every manual add/remove.</p>
+<pre><code class="language-sql">-- Added to migration 012
+CREATE TABLE app.correspondent (
+  address      text PRIMARY KEY,
+  source       text NOT NULL CHECK (source IN (&#39;scan&#39;,&#39;manual&#39;)),
+  note         text,                          -- optional: why this was added manually
+  first_seen   timestamptz DEFAULT now(),
+  last_seen_at timestamptz DEFAULT now()      -- bumped each time the scan re-encounters the address
+);
+</code></pre>
+<h4>Bootstrap scan (one-time)</h4>
+<p><code>bun run foldersort:scan-sent -- --since 365d</code> does:</p>
+<ol>
+<li>JMAP-fetch sent mailbox (<code>role=&#39;sent&#39;</code>).</li>
+<li><code>Email/query</code> with <code>filter: { inMailbox: &lt;sent_id&gt;, after: &lt;iso N days ago&gt; }</code>, paginated.</li>
+<li>For each batch, <code>Email/get</code> with <code>properties: [&quot;to&quot;,&quot;cc&quot;,&quot;bcc&quot;,&quot;sentAt&quot;]</code>.</li>
+<li>Extract all addresses from <code>to + cc + bcc</code>, lowercase, dedupe.</li>
+<li><strong>Upsert into <code>app.correspondent</code></strong> with <code>source=&#39;scan&#39;</code>, bumping <code>last_seen_at</code> on existing rows.</li>
+<li><strong>Regenerate the audit file</strong> from <code>SELECT address FROM app.correspondent ORDER BY address</code>.</li>
+<li>Print a count summary (<code>Upserted N addresses, M new; file now has K lines</code>).</li>
+</ol>
+<h4>Daily incremental scan (cron)</h4>
+<p>Same script, run with <code>--since 2d</code> from a new Graphile Worker cron task (registered in <code>pib/worker.ts</code>):</p>
+<ul>
+<li><strong>Schedule</strong>: daily at 04:30 ET (before the 6:45 ET digest)</li>
+<li><strong>Why 2 days</strong>: cheap overlap to absorb missed runs / DST quirks / clock drift; the JMAP fetch is small at this scale</li>
+<li><strong>Effect</strong>: any address Vineel sent mail to on day N is upserted to the correspondent table by day N+1&#39;s run. From day N+1&#39;s incoming mail onward, the sender is treated as known and stays in inbox by the <code>people-i-don&#39;t-know</code> heuristic.</li>
+</ul>
+<p>This delivers the user&#39;s &quot;second day&quot; semantic: emailing someone today → they&#39;re in the whitelist tomorrow morning, so their replies don&#39;t get routed away.</p>
+<h4>Manual whitelist via MCP</h4>
+<p>Two new MCP tools (in <code>willow-foldersort</code>):</p>
+<ul>
+<li><code>add_correspondent(email, note?)</code> — immediate upsert with <code>source=&#39;manual&#39;</code>. Use case: <em>&quot;I know <a href="mailto:brent@wakes.com">brent@wakes.com</a> now&quot;</em> → agent calls <code>add_correspondent(&quot;brent@wakes.com&quot;, &quot;met at conference&quot;)</code>. Brent&#39;s next incoming email finds him in the list and stays in inbox.</li>
+<li><code>remove_correspondent(email)</code> — delete from table. Use case: <em>&quot;I don&#39;t actually know this person, take them off&quot;</em> (covers cases where the scan picked up an automation address that shouldn&#39;t grant trust, like <code>82700857702227032042668224308989ver2@mg.upwork.com</code>).</li>
+<li><code>list_correspondents(contains?)</code> — filtered listing for inspection.</li>
+</ul>
+<p>All three regenerate the audit file synchronously after mutating the table.</p>
+<h4>Splitting responsibilities</h4>
+<ul>
+<li>The DB is the runtime index — fast <code>EXISTS</code> check during decide.</li>
+<li>The file is the audit artifact — user can <code>cat</code> / grep / sort. Never edited by hand (changes get clobbered on next regen); manual changes go through <code>add_correspondent</code> / <code>remove_correspondent</code> MCP.</li>
+<li>The bootstrap-vs-daily split keeps the slow first scan separate from the cheap incremental ones, but both go through the same code path.</li>
+</ul>
+<hr>
+<h2>Backfill flow (v0)</h2>
+<p><code>bun run foldersort:backfill -- --days N</code> (default <code>--days 1</code>):</p>
+<ol>
+<li>Pull last N days of inbox messages from <code>app.fact</code> joined to <code>app.source_note</code> (already-ingested emails only — no JMAP re-fetch).</li>
+<li>For each, run <code>decide(fact, profiles, rules)</code> to produce <code>{ target, decided_by, reason }</code>.</li>
+<li>Write <code>folder_target</code>, <code>folder_decided_by</code>, <code>folder_proposed_at</code> to the fact. <strong>No JMAP move.</strong></li>
+<li>Print summary: &quot;Proposed: 23 → Receipts, 8 → Subscriptions, 4 → Bills, 67 → leave_in_inbox&quot;.</li>
+<li>Emit a one-line digest entry per proposed move for review.</li>
+</ol>
+<p>User runs <code>--days 1</code> first to spot-check; once happy, <code>--days 7</code> for the broader pass.</p>
+<hr>
+<h2>Rollout phases (from user&#39;s prior notes; binding)</h2>
+<p><strong>Phase 1 (v0) — proposal-only.</strong> Pipeline writes <code>folder_target</code> + <code>folder_proposed_at</code> to the fact; does NOT call any JMAP move. Daily digest grows a section: &quot;I would move 47 emails: [list with target + reason].&quot; Vineel approves via a Gizmo or by calling an MCP tool. On approval, the dispatch worker calls <code>moveEmail()</code> and stamps <code>folder_applied_at</code>. <strong>No auto-execution in v0.</strong></p>
+<p><strong>Phase 2 (post-v0) — per-rule confidence threshold.</strong> Once a <code>folder_rule</code> has 20+ proposals approved with zero rejections, flip an <code>auto_apply</code> flag on that rule. LLM-driven decisions stay proposal-only.</p>
+<p><strong>Phase 3 (post-v0) — full auto with weekly audit.</strong></p>
+<p>The migration supports all three: <code>folder_proposed_at</code> vs <code>folder_applied_at</code> are separate columns; <code>apply.ts</code> is a separate function only invoked by approval flow, not by the pipeline directly.</p>
+<hr>
+<h2>Files to add / modify</h2>
+<p><strong>Add:</strong></p>
+<ul>
+<li><code>db/migrations/012-foldersort.sql</code> — <code>folder_profile</code>, <code>folder_rule</code>, fact columns</li>
+<li><code>pib/jmap/mutate.ts</code> — <code>moveEmail(session, token, emailId, addMailboxId, removeMailboxId)</code> via <code>Email/set</code>. Not called from pipeline in v0; reserved for approval flow.</li>
+<li><code>pib/foldersort/profiles.ts</code> — load/upsert/update profiles, including bootstrap traversal of <code>willow-secondary</code> subfolders</li>
+<li><code>pib/foldersort/rules.ts</code> — load + first-match-wins (calls into <code>pib/triage/engine.ts</code> helpers)</li>
+<li><code>pib/foldersort/llm.ts</code> — Gemma call with enum-constrained schema, <code>leave_in_inbox</code> always present and emphasized as default</li>
+<li><code>pib/foldersort/decide.ts</code> — orchestrator: rules → LLM → default</li>
+<li><code>pib/foldersort/types.ts</code> — interfaces</li>
+<li><code>mcp/foldersort-mcp/server.ts</code> — the MCP server with the 10 tools above</li>
+<li><code>pib/scripts/foldersort-bootstrap.ts</code> — CLI: scan <code>willow-secondary</code> subfolders, upsert profiles, seed descriptions + senders from the seed taxonomy table above</li>
+<li><code>pib/scripts/foldersort-scan-sent.ts</code> — CLI: JMAP-scan sent mailbox, upsert into <code>app.correspondent</code>, regenerate <code>data/correspondents.txt</code>. Single script handles both bootstrap (<code>--since 365d</code>) and daily incremental (<code>--since 2d</code>).</li>
+<li><code>pib/foldersort/seed-taxonomy.ts</code> — the seed-taxonomy constants (profile name → description, llm_hint, seed senders). Single source of truth for the bootstrap.</li>
+<li><code>pib/foldersort/correspondents.ts</code> — query helper: <code>isKnownCorrespondent(address): Promise&lt;boolean&gt;</code> against <code>app.correspondent</code>; plus <code>addCorrespondent(email, note?)</code>, <code>removeCorrespondent(email)</code>, <code>regenerateFile()</code> used by the scan script and MCP tools.</li>
+<li><code>pib/scripts/foldersort-backfill.ts</code> — CLI: <code>--days N</code> (default 1) → propose targets for recent inbox, no writes to mail</li>
+<li><code>pib/scripts/foldersort-dry-run.ts</code> — CLI: run decision on a specific email by URL/id, print result without writing</li>
+<li><code>pib/scripts/foldersort-preview.ts</code> — CLI: print N recent-inbox decisions in the compact chat-formatted blocks (mirrors the <code>preview_inbox_sort</code> MCP tool)</li>
+<li><code>pib/foldersort/format.ts</code> — shared formatter that produces the compact preview blocks (used by both the CLI and the MCP tool, so output stays identical)</li>
+</ul>
+<p><strong>Modify:</strong></p>
+<ul>
+<li><code>pib/jmap/session.ts</code> — extend <code>getMailboxes()</code> to also return <code>parentId</code> (one-line change to the JMAP properties array)</li>
+<li><code>pib/jmap/query.ts</code> — extend <code>queryEmails()</code> to accept an optional <code>{ after?: string }</code> date filter; add <code>getEmailRecipients(ids)</code> that fetches only <code>to|cc|bcc|sentAt</code> properties (lighter than the full body fetch for the sent-scan)</li>
+<li><code>.gitignore</code> (project root) — add <code>willow/data/correspondents.txt</code> so the address dump doesn&#39;t get committed</li>
+<li><code>pib/pipeline.ts</code> — insert step 8 after classify, before dispatch; proposal-only (writes <code>folder_*</code> columns, no JMAP). Skip when triage <code>action=noise</code> or signal folder action <code>process</code>/<code>block</code>.</li>
+<li><code>pib/worker.ts</code> — register a daily Graphile Worker cron task <code>foldersort_scan_sent_daily</code> that runs the equivalent of <code>bun run foldersort:scan-sent -- --since 2d</code> at 04:30 ET (before the 06:45 ET digest).</li>
+<li><code>db/schema.sql</code> — mirror migration 012</li>
+<li><code>pib/digest.ts</code> — add &quot;proposed moves&quot; section (Phase 1) summarizing today&#39;s proposals</li>
+<li><code>~/aidev/willow/CLAUDE.md</code> — MCP table + pipeline diagram</li>
+<li><code>package.json</code> — add scripts <code>foldersort:bootstrap</code>, <code>foldersort:scan-sent</code>, <code>foldersort:backfill</code>, <code>foldersort:dry-run</code>, <code>foldersort:preview</code>, <code>foldersort:migrate</code></li>
+</ul>
+<hr>
+<h2>Critical existing functions to reuse</h2>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Reuse</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Field-level matching</td>
+<td><code>extractFieldValue()</code> + <code>matchOperator()</code> at <code>pib/triage/engine.ts:9-80</code></td>
+</tr>
+<tr>
+<td>Loading rules sorted by priority</td>
+<td>Pattern from <code>pib/triage/engine.ts:86-112</code></td>
+</tr>
+<tr>
+<td>LM Studio call with json_schema</td>
+<td><code>chatCompletion()</code> at <code>memory/lmstudio/client.ts</code></td>
+</tr>
+<tr>
+<td>&quot;List + pick one&quot; prompt template</td>
+<td><code>pib/classify.ts:50-86</code></td>
+</tr>
+<tr>
+<td>MCP tool style + zod schemas</td>
+<td><code>mcp/triage-mcp/server.ts</code>, <code>mcp/interests-mcp/server.ts</code></td>
+</tr>
+<tr>
+<td>Mailbox name → id lookup</td>
+<td><code>getMailboxes()</code>/<code>findMailbox()</code> at <code>pib/jmap/session.ts:42-78</code></td>
+</tr>
+<tr>
+<td>JMAP <code>Email/set</code> shape (for the new <code>moveEmail</code>)</td>
+<td><code>sendEmail()</code> at <code>pib/jmap/notify.ts:117-212</code></td>
+</tr>
+<tr>
+<td>Fetch a specific email by URL</td>
+<td><code>POST /mail/get</code> on the Bridge (existing)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Verification</h2>
+<ol>
+<li><strong>Migration runs cleanly</strong>: <code>psql -d willow -f db/migrations/012-foldersort.sql</code> then re-run; idempotency via <code>CREATE TABLE IF NOT EXISTS</code> and <code>ADD COLUMN IF NOT EXISTS</code>.</li>
+<li><strong>Bootstrap finds the right folders and seeds them</strong>: <code>bun run foldersort:bootstrap</code>. Output lists every subfolder under <code>willow-secondary</code> (7 expected: uninteresting, marketing-interesting, zeph-college, maybe-spam, my-reading, people-i-don&#39;t-know, vineel-curated). <code>folder_profile</code> rows are upserted with seed descriptions. <code>vineel-curated</code> is enabled=false. Inbox and unrelated top-level folders are NOT included. Seed <code>folder_rule</code> rows for spotify/anthropic/openai/visasq/zenni/substack/businessinsider/alleywatch exist.</li>
+<li><strong>Sent-scan bootstrap</strong>: <code>bun run foldersort:scan-sent -- --since 365d</code> upserts addresses into <code>app.correspondent</code> and writes the regenerated <code>willow/data/correspondents.txt</code>. Confirm <code>psql -d willow -c &quot;SELECT count(*), source FROM app.correspondent GROUP BY source&quot;</code> matches the file&#39;s line count (all <code>source=&#39;scan&#39;</code> after a fresh run).</li>
+<li><strong>Daily incremental cron</strong>: after wiring the Graphile Worker task, force-run via <code>launchctl stop com.vineel.willow-worker</code> (auto-restart). Confirm in <code>/tmp/willow-worker.log</code> that the <code>foldersort_scan_sent_daily</code> task fired on its next scheduled tick and that <code>SELECT max(last_seen_at) FROM app.correspondent</code> is recent.</li>
+<li><strong>Manual whitelist</strong>: from a Claude Code session, call <code>add_correspondent(&quot;brent@wakes.com&quot;, &quot;test&quot;)</code>. Confirm <code>psql -d willow -c &quot;SELECT * FROM app.correspondent WHERE address=&#39;brent@wakes.com&#39;&quot;</code> shows <code>source=&#39;manual&#39;</code>. The audit file should now contain <code>brent@wakes.com</code> at the right sorted position.</li>
+<li><strong>Profile CRUD via MCP</strong>: from a Claude Code session, call <code>list_profiles</code>, <code>update_profile</code> (fill descriptions), <code>disable_profile</code>. Confirm rows update.</li>
+<li><strong>Deterministic rule fires</strong>: create <code>folder_rule(field=from_domain, value=spotify.com, target=&lt;some-subfolder&gt;)</code>. <code>bun run foldersort:dry-run -- --url &lt;fastmail-spotify-url&gt;</code> shows <code>decided_by=&#39;rule&#39;</code> targeting that subfolder.</li>
+<li><strong>LLM fallback fires + leans inbox-conservative</strong>: with descriptions in place and no matching rule, run <code>bun run foldersort:backfill -- --days 1</code>. Expect the majority verdict to be <code>leave_in_inbox</code>; sorted-away targets should look correct on spot-check.</li>
+<li><strong>Backfill writes only proposals</strong>: after <code>--days 1</code>, <code>psql -d willow -c &quot;SELECT folder_decided_by, count(*) FROM app.fact WHERE folder_proposed_at &gt;= now() - interval &#39;1 day&#39; GROUP BY 1&quot;</code> shows decided_by distribution; <code>SELECT count(*) FROM app.fact WHERE folder_applied_at IS NOT NULL</code> is <code>0</code>. <code>tail -f /tmp/willow-worker.log</code> shows no JMAP mutate writes.</li>
+<li><strong>Preview-and-correct loop in chat</strong>: from a Claude Code session, call <code>preview_inbox_sort(count=20)</code>. Inspect the 20 blocks; pick one you disagree with and say &quot;Change #N to FOLDER&quot;. The agent resolves the reference and calls <code>correct_placement</code> against the right fact_id. Re-run the preview to confirm the corrected email no longer appears (or appears with the new target).</li>
+<li><strong>Corrective loop end-to-end</strong>: feed a known mistake to <code>correct_placement(url, &quot;&lt;right-folder&gt;&quot;)</code>. Inspect: rule demoted OR example_sender appended OR new auto-rule (depending on history). Re-run <code>foldersort:dry-run</code> against the same email; confirm it now proposes correctly.</li>
+<li><strong>Scale spot-check before going wider</strong>: only after <code>--days 1</code> looks right, run <code>--days 7</code> and re-check distribution. Review proposals before approving any moves.</li>
+</ol>
+<hr>
+<h2>Open questions surfaced to user</h2>
+<p>From <code>working-on-spam-filter.md</code> and the architecture decision:</p>
+<ol>
+<li><strong>Source of truth shape</strong>: structured per-folder rows (this plan) vs. a single growing markdown doc (<code>organize-rules.md</code>) fed as system prompt?</li>
+<li><strong>Initial taxonomy</strong>: bootstrap profiles from existing Fastmail folders (via <code>getMailboxes()</code>) and ask the user to describe each, vs. design fresh?</li>
+<li><strong>Backfill</strong>: organize inbox going forward only, vs. one-time pass over historical inbox? Big stakes implication for proposal-mode review volume.</li>
+<li><strong>Delete semantics</strong>: when a rule says &quot;delete&quot; (out of scope for v0 but coming), <code>Email/set destroy</code> vs move to Trash? Latter much safer.</li>
+</ol>
+<p>These should be answered before implementation begins; (1) and (2) shape the schema, (3) shapes the digest UX, (4) is deferrable.</p>
+
+<hr>
+<p class="meta">Rendered from <code>~/.claude/plans/i-want-to-write-eager-garden.md</code> on 2026-05-24T14:25:19.231Z.</p>
+</main>
+</body>
+</html>

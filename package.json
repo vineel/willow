@@ -35,6 +35,7 @@
     "mcp:calendar": "bun run --silent mcp/calendar-mcp/server.ts",
     "mcp:slack-channel": "bun run --silent mcp/slack-channel/server.ts",
     "mcp:session": "bun run --silent mcp/session-mcp/server.ts",
+    "mcp:foldersort": "bun run --silent mcp/foldersort-mcp/server.ts",
     "pib:fetch": "bun run pib/fetch.ts",
     "pib:run": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/run-pipeline.ts",
     "pib:worker": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/worker.ts",
@@ -53,7 +54,13 @@
     "cal:migrate:write": "psql -d willow -f db/migrations/006-cal-write-support.sql",
     "pib:portfolio": "bun run pib/scripts/portfolio-report.ts",
     "pib:portfolio:migrate": "psql -d willow -f db/migrations/011-portfolio-valuations.sql",
-    "pib:redispatch": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/redispatch-failed.ts"
+    "pib:redispatch": "NOTES_ROOT=${NOTES_ROOT:-/dev/null} bun run pib/scripts/redispatch-failed.ts",
+    "foldersort:scan-sent": "bun run pib/scripts/foldersort-scan-sent.ts",
+    "foldersort:bootstrap": "bun run pib/scripts/foldersort-bootstrap.ts",
+    "foldersort:dry-run": "bun run pib/scripts/foldersort-dry-run.ts",
+    "foldersort:backfill": "bun run pib/scripts/foldersort-backfill.ts",
+    "foldersort:preview": "bun run pib/scripts/foldersort-preview.ts",
+    "foldersort:migrate": "psql -d willow -f db/migrations/012-foldersort.sql"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

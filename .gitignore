@@ -27,6 +27,9 @@ bun.lockb
 memory/could-not-ingest.txt
 memory/retry-later.txt
 
+# Regenerated audit dumps (source of truth is Postgres; contains personal contact data)
+data/correspondents.txt
+
 # One-off analysis artifacts and run outputs
 ds9.local
 notes/farley-assessments/*.json

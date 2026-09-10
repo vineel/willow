@@ -19,6 +19,7 @@ const PUBLIC_URL = process.env.WILLOW_PUBLIC_URL ?? "http://terokNor.local:8787"
 interface DigestItem {
   factId: string;
   title: string;
+  summary: string | null;
   senderName: string;
   senderAddress: string;
   category: string | null;
@@ -58,6 +59,23 @@ interface MovieDigestSection {
   movies: string[];
 }
 
+interface FoldersortProposalItem {
+  factId: string;
+  title: string;
+  fromName: string | null;
+  fromAddress: string;
+  receivedAt: Date;
+  target: string;
+  decidedBy: string;
+  reason: string | null;
+}
+
+interface FoldersortDigestSection {
+  items: FoldersortProposalItem[];
+  counts: Record<string, number>;
+  totalEligible: number;
+}
+
 const SOPAC_EVENTS_URL = "https://www.sopacnow.org/events/";
 const SOPAC_LOOKAHEAD_DAYS = 30;
 
@@ -69,6 +87,7 @@ export async function getPendingDigestItems(): Promise<DigestItem[]> {
     SELECT
       f.fact_id,
       f.title,
+      f.summary,
       f.extracted_data,
       sn.metadata->>'from' as from_meta,
       sn.source_ref,
@@ -95,6 +114,7 @@ export async function getPendingDigestItems(): Promise<DigestItem[]> {
     return {
       factId: r.fact_id,
       title: r.title ?? "(no subject)",
+      summary: r.summary ?? null,
       senderName: fromMeta.displayName ?? "Unknown",
       senderAddress: fromMeta.address ?? "unknown",
       category: r.category,
@@ -181,6 +201,7 @@ export function formatDigestText(groups: DigestGroup[], count: number, todos: To
       const linkUrl = item.extractedUrls[0] ?? item.fastmailUrl;
       lines.push(`  • ${item.title}`);
       lines.push(`    ${item.senderName} <${item.senderAddress}> — ${date}`);
+      if (item.summary) lines.push(`    ${item.summary}`);
       if (linkUrl) lines.push(`    ${linkUrl}`);
     }
   }
@@ -243,8 +264,11 @@ export function formatDigestHtml(groups: DigestGroup[], count: number, todos: To
       const emailLink = item.extractedUrls.length > 0 && item.fastmailUrl
         ? ` <a href="${escapeHtml(item.fastmailUrl)}" style="color:#999;font-size:0.8em;text-decoration:none">[email]</a>`
         : "";
+      const summaryHtml = item.summary
+        ? `<div style="color:#555;font-size:0.88em;margin-top:2px">${escapeHtml(item.summary)}</div>`
+        : "";
       return `<tr>
-        <td style="padding:4px 8px">${titleHtml}${emailLink}</td>
+        <td style="padding:4px 8px">${titleHtml}${emailLink}${summaryHtml}</td>
         <td style="padding:4px 8px;color:#666">${escapeHtml(item.senderName)}</td>
         <td style="padding:4px 8px;color:#999;font-size:0.9em">${date}</td>
       </tr>`;
@@ -396,6 +420,94 @@ function parseMovieList(description: string | null): string[] {
     .filter(Boolean);
 }
 
+// Foldersort proposed-moves section: yesterday's proposals that haven't yet
+// been applied. Read-only digest; the user reviews here and approves via the
+// MCP correct_placement / future approval flow.
+export async function getFoldersortDigestSection(): Promise<FoldersortDigestSection | null> {
+  const rows = (await sql`
+    SELECT f.fact_id, sn.title, sn.metadata, sn.received_at,
+           f.folder_target, f.folder_decided_by, f.folder_reason
+    FROM app.fact f
+    JOIN app.source_note sn ON sn.source_note_id = f.source_note_id
+    WHERE f.folder_proposed_at >= now() - interval '24 hours'
+      AND f.folder_applied_at IS NULL
+      AND f.folder_target IS NOT NULL
+      AND f.folder_target != 'leave_in_inbox'
+    ORDER BY f.folder_proposed_at DESC
+    LIMIT 50
+  `) as unknown as any[];
+  if (rows.length === 0) return null;
+
+  const items: FoldersortProposalItem[] = rows.map((r) => {
+    const from = r.metadata?.from ?? {};
+    return {
+      factId: r.fact_id,
+      title: r.title ?? "(no subject)",
+      fromName: from.displayName ?? from.name ?? null,
+      fromAddress: from.address ?? from.email ?? "unknown",
+      receivedAt: r.received_at,
+      target: r.folder_target,
+      decidedBy: r.folder_decided_by,
+      reason: r.folder_reason ?? null,
+    };
+  });
+
+  const counts: Record<string, number> = {};
+  for (const it of items) counts[it.target] = (counts[it.target] ?? 0) + 1;
+
+  return { items, counts, totalEligible: items.length };
+}
+
+function formatFoldersortDigestText(section: FoldersortDigestSection): string {
+  const lines: string[] = [];
+  lines.push(`\n## Foldersort proposals (${section.totalEligible} pending)\n`);
+  const distribution = Object.entries(section.counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k}=${v}`)
+    .join(" ");
+  lines.push(`  ${distribution}\n`);
+  for (const it of section.items.slice(0, 20)) {
+    const id = it.factId.slice(0, 4);
+    const from = it.fromName ? `${it.fromName} <${it.fromAddress}>` : it.fromAddress;
+    lines.push(`  [${id}] ${it.title.slice(0, 70)}`);
+    lines.push(`         ${from}`);
+    lines.push(`         → ${it.target} (${it.decidedBy}${it.reason ? ": " + it.reason.slice(0, 80) : ""})`);
+  }
+  if (section.items.length > 20) {
+    lines.push(`  …and ${section.items.length - 20} more`);
+  }
+  return lines.join("\n");
+}
+
+function formatFoldersortDigestHtml(section: FoldersortDigestSection): string {
+  const distribution = Object.entries(section.counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `<span style="color:#555;margin-right:12px">${escapeHtml(k)}: <b>${v}</b></span>`)
+    .join("");
+  const rows = section.items.slice(0, 20).map((it) => {
+    const id = escapeHtml(it.factId.slice(0, 4));
+    const from = escapeHtml(it.fromName ? `${it.fromName} <${it.fromAddress}>` : it.fromAddress);
+    const reason = it.reason ? ` — ${escapeHtml(it.reason.slice(0, 100))}` : "";
+    return `<tr>
+      <td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:ui-monospace,monospace;font-size:0.85em;color:#888">${id}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #eee">
+        <div>${escapeHtml(it.title.slice(0, 90))}</div>
+        <div style="font-size:0.85em;color:#666">${from}</div>
+      </td>
+      <td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:0.85em">
+        <b>${escapeHtml(it.target)}</b>
+        <div style="color:#888">${escapeHtml(it.decidedBy)}${reason}</div>
+      </td>
+    </tr>`;
+  }).join("");
+  const overflow = section.items.length > 20
+    ? `<p style="margin:8px 0;color:#999;font-size:0.85em">…and ${section.items.length - 20} more</p>` : "";
+  return `<h3 style="margin:16px 0 8px">Foldersort proposals (${section.totalEligible} pending)</h3>
+    <div style="margin-bottom:8px">${distribution}</div>
+    <table style="border-collapse:collapse;width:100%">${rows}</table>
+    ${overflow}`;
+}
+
 export async function getSopacDigestSection(now = new Date()): Promise<SopacDigestSection | null> {
   if (easternDateParts(now).weekday !== "Fri") return null;
 
@@ -440,8 +552,9 @@ export async function previewDigest(): Promise<{ text: string; count: number }> 
   const calSection = await getCalDigestSection();
   const sopacSection = await getSopacDigestSection();
   const movieSection = await getMovieDigestSection();
+  const foldersortSection = await getFoldersortDigestSection();
 
-  if (items.length === 0 && todos.length === 0 && !calSection && !sopacSection && !movieSection) {
+  if (items.length === 0 && todos.length === 0 && !calSection && !sopacSection && !movieSection && !foldersortSection) {
     return { text: "No pending digest items, todos, or calendar events.", count: 0 };
   }
   const groups = groupDigestItems(items);
@@ -455,6 +568,9 @@ export async function previewDigest(): Promise<{ text: string; count: number }> 
   if (movieSection) {
     text += "\n" + formatMovieDigestText(movieSection);
   }
+  if (foldersortSection) {
+    text += "\n" + formatFoldersortDigestText(foldersortSection);
+  }
   return { text, count: items.length };
 }
 
@@ -467,12 +583,13 @@ export async function sendDigest(): Promise<{ sent: boolean; count: number }> {
   const calSection = await getCalDigestSection();
   const sopacSection = await getSopacDigestSection();
   const movieSection = await getMovieDigestSection();
+  const foldersortSection = await getFoldersortDigestSection();
 
-  if (items.length === 0 && todos.length === 0 && !calSection && !sopacSection && !movieSection) {
+  if (items.length === 0 && todos.length === 0 && !calSection && !sopacSection && !movieSection && !foldersortSection) {
     log.info("No pending digest items, todos, or calendar events");
     return { sent: false, count: 0 };
   }
-  log.info(`Composing digest with ${items.length} items, ${todos.length} todos${calSection ? ", calendar section" : ""}${sopacSection ? ", SOPAC section" : ""}${movieSection ? ", movie section" : ""}`);
+  log.info(`Composing digest with ${items.length} items, ${todos.length} todos${calSection ? ", calendar section" : ""}${sopacSection ? ", SOPAC section" : ""}${movieSection ? ", movie section" : ""}${foldersortSection ? ", foldersort section (" + foldersortSection.totalEligible + ")" : ""}`);
 
   const groups = groupDigestItems(items);
   let bodyText = formatDigestText(groups, items.length, todos);
@@ -485,11 +602,13 @@ export async function sendDigest(): Promise<{ sent: boolean; count: number }> {
   const calHtml = calSection ? formatCalDigestHtml(calSection) : "";
   const sopacHtml = sopacSection ? formatSopacDigestHtml(sopacSection) : "";
   const movieHtml = movieSection ? formatMovieDigestHtml(movieSection) : "";
-  bodyHtml = bodyHtml.replace("</div>", calHtml + sopacHtml + movieHtml + footerHtml + "</div>");
+  const foldersortHtml = foldersortSection ? formatFoldersortDigestHtml(foldersortSection) : "";
+  bodyHtml = bodyHtml.replace("</div>", calHtml + sopacHtml + movieHtml + foldersortHtml + footerHtml + "</div>");
 
   bodyText += (calSection ? "\n" + formatCalDigestText(calSection) : "")
            + (sopacSection ? "\n" + formatSopacDigestText(sopacSection) : "")
            + (movieSection ? "\n" + formatMovieDigestText(movieSection) : "")
+           + (foldersortSection ? "\n" + formatFoldersortDigestText(foldersortSection) : "")
            + `\n\n---\nManage todos: ${PUBLIC_URL}/todos\n`;
 
   // Send via JMAP

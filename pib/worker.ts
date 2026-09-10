@@ -20,6 +20,7 @@ import { runCalSync } from "../cal/sync";
 import { runCalExtraction } from "../cal/extract";
 import { runPortfolioReport } from "./portfolio/run";
 import { executeGizmoDispatch, sweepExpiredGizmos } from "./gizmo-dispatch";
+import { runScanSent } from "./foldersort/scan-sent";
 
 const log = createLogger("pib.worker");
 const FOLDERS_TO_SYNC = ["inbox", "for-willow", "not-for-willow", "Ai Buzz"];
@@ -107,6 +108,21 @@ const tasks: TaskList = {
       log.error(`Gizmo sweep failed: ${(err as Error).message}`);
     }
   },
+
+  async foldersort_scan_sent(payload, _helpers) {
+    const etHour = (payload as { __etHour?: number })?.__etHour;
+    if (etHour !== undefined && !inEasternHour(etHour)) return;
+    const since = (payload as { since?: string })?.since ?? "2d";
+    log.runStart(`foldersort scan-sent (since=${since})`);
+    try {
+      const r = await runScanSent(since);
+      log.info(
+        `scan-sent done: ${r.inserted} new, ${r.updated} bumped, ${r.emailsSeen} emails`
+      );
+    } catch (err) {
+      log.error(`foldersort scan-sent failed: ${(err as Error).message}`);
+    }
+  },
 };
 
 const crontab = parseCronItems([
@@ -162,6 +178,13 @@ const crontab = parseCronItems([
     match: "0 * * * *",
     identifier: "gizmo_sweep_cron",
   },
+  ...etCronItems({
+    task: "foldersort_scan_sent",
+    identifier: "foldersort_scan_sent_daily_cron",
+    hour: 4,
+    minute: 30,
+    payload: { since: "2d" },
+  }),
 ]);
 
 async function main() {
@@ -184,7 +207,7 @@ async function main() {
     parsedCronItems: crontab,
   });
 
-  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 6:45am ET M-F / 8am ET Sat-Sun, portfolio 9:15/12:30/16:15 ET M-F, cal_sync */30min");
+  log.info("Graphile Worker started — cron: pib_ingest */15min, pib_digest 6:45am ET M-F / 8am ET Sat-Sun, portfolio 9:15/12:30/16:15 ET M-F, cal_sync */30min, foldersort_scan_sent 4:30am ET daily");
 
   const shutdown = async () => {
     log.info("Shutting down...");

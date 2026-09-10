@@ -22,6 +22,10 @@ import { loadActiveInterests, matchInterests } from "./interest-matcher";
 import { classify, writeClassification } from "./classify";
 import { needsExtraction, extract, writeExtraction } from "./extract";
 import { dispatch } from "./dispatch";
+import { decide as foldersortDecide } from "./foldersort/decide";
+import { listProfiles } from "./foldersort/profiles";
+import { loadActiveRules as loadActiveFolderRules } from "./foldersort/rules";
+import { applyDecision, shouldAutoApply } from "./foldersort/apply";
 import { createLogger } from "./logger";
 import type { CanonicalEvent } from "./jmap/types";
 
@@ -36,6 +40,7 @@ export interface PipelineStats {
   classified: number;
   extracted: number;
   dispatched: number;
+  foldersorted: Record<string, number>;
   errors: string[];
 }
 
@@ -50,7 +55,7 @@ export async function runPipeline(
 
   const stats: PipelineStats = {
     fetched: 0, ingested: 0, skipped: 0,
-    triaged: {}, classified: 0, extracted: 0, dispatched: 0, errors: [],
+    triaged: {}, classified: 0, extracted: 0, dispatched: 0, foldersorted: {}, errors: [],
   };
 
   if (folder.toLowerCase() === pibConfig.folders.notifications) {
@@ -123,7 +128,13 @@ export async function runPipeline(
   const rules = await loadRules();
   const interests = await loadActiveInterests();
   const folderAction = classifyFolder(folder);
-  log.debug(`Loaded ${rules.length} triage rules, ${interests.length} active interests`);
+  // Foldersort: only run on inbox folder (we don't sort signal/willow folders).
+  const isInbox = folder.toLowerCase() === "inbox";
+  const folderProfiles = isInbox ? await listProfiles(true) : [];
+  const folderRules = isInbox ? await loadActiveFolderRules() : [];
+  const profilesByName = new Map(folderProfiles.map((p) => [p.name, p] as const));
+  const autoApply = isInbox && shouldAutoApply();
+  log.debug(`Loaded ${rules.length} triage rules, ${interests.length} active interests, ${folderProfiles.length} folder profiles, ${folderRules.length} folder rules${isInbox ? ` (foldersort auto_apply=${autoApply})` : ""}`);
 
   // Process each event through the pipeline
   for (const event of events) {
@@ -171,8 +182,38 @@ export async function runPipeline(
       // Log the email with all its pipeline results so far
       let logLine = `EMAIL from=${from} subject="${subject}" entity=${entityLabel} triage=${triageLabel}`;
 
-      // Skip noise for further processing
+      const applyFoldersort = async (factId: string): Promise<void> => {
+        if (!isInbox || folderAction !== "normal") return;
+
+        try {
+          const decision = await foldersortDecide(event, {
+            profiles: folderProfiles,
+            rules: folderRules,
+          });
+          stats.foldersorted[decision.target] = (stats.foldersorted[decision.target] ?? 0) + 1;
+          const result = await applyDecision(factId, event.sourceRef, decision, {
+            session, token, inboxMailboxId: mailbox.id, profilesByName,
+          });
+          const tag = result.moved ? "moved" : result.applied ? "applied" : autoApply ? "applyFAILED" : "proposed";
+          logLine += ` foldersort=${decision.target}(${decision.decided_by},${tag}${result.error ? ":" + result.error : ""})`;
+        } catch (err) {
+          const errMsg = (err as Error).message;
+          await sql`
+            UPDATE app.fact SET folder_error = ${errMsg}, folder_proposed_at = now()
+            WHERE fact_id = ${factId}
+          `;
+          logLine += ` foldersort=ERROR(${errMsg})`;
+        }
+      };
+
+      // Skip noise for classification/extraction/dispatch, but still move it out of inbox.
       if (triageResult.action === "noise") {
+        const [fact] = await sql`
+          SELECT fact_id FROM app.fact WHERE source_note_id = ${ingestResult.sourceNoteId} LIMIT 1
+        `;
+        if (fact) {
+          await applyFoldersort(fact.fact_id);
+        }
         log.info(logLine);
         continue;
       }
@@ -214,7 +255,11 @@ export async function runPipeline(
             }
           }
 
-          // 8. Dispatch
+          // 8. Foldersort: decide + (by default) apply via JMAP move.
+          //    Only on inbox / normal folder verdicts.
+          await applyFoldersort(fact.fact_id);
+
+          // 9. Dispatch
           if (doDispatch && interestMatches.length > 0) {
             const dispatchResult = await dispatch(event, fact.fact_id, interestMatches, extractedData);
             stats.dispatched += dispatchResult.actionsExecuted;
@@ -237,10 +282,13 @@ export async function runPipeline(
 
   // Summary line
   const triageSummary = Object.entries(stats.triaged).map(([k, v]) => `${k}=${v}`).join(" ");
+  const foldersortSummary = Object.entries(stats.foldersorted).map(([k, v]) => `${k}=${v}`).join(" ");
   log.info(
     `DONE folder=${folder} sync=${syncMode} fetched=${stats.fetched} ingested=${stats.ingested} ` +
     `skipped=${stats.skipped} triage={${triageSummary}} classified=${stats.classified} ` +
-    `extracted=${stats.extracted} dispatched=${stats.dispatched} errors=${stats.errors.length}`
+    `extracted=${stats.extracted} dispatched=${stats.dispatched}` +
+    (foldersortSummary ? ` foldersort={${foldersortSummary}}` : "") +
+    ` errors=${stats.errors.length}`
   );
 
   return stats;

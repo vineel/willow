@@ -107,6 +107,15 @@ CREATE TABLE app.fact (
   digest_queued_at  timestamptz,
   digest_sent_at    timestamptz,
 
+  -- PIB foldersort: proposal-only in v0 (folder_applied_at null until approval flow runs the move)
+  folder_target      text,
+  folder_decided_by  text CHECK (folder_decided_by IS NULL OR folder_decided_by IN ('rule','llm','default','skip','manual')),
+  folder_rule_id     uuid,          -- FK to app.folder_rule, added after folder_rule table exists
+  folder_reason      text,          -- one-line rationale (LLM-supplied or rule name)
+  folder_proposed_at timestamptz,
+  folder_applied_at  timestamptz,
+  folder_error       text,
+
   created_at        timestamptz NOT NULL DEFAULT now(),
   updated_at        timestamptz NOT NULL DEFAULT now()
 );
@@ -120,6 +129,8 @@ CREATE INDEX idx_fact_memory_type ON app.fact (memory_type);
 CREATE INDEX idx_fact_is_active ON app.fact (is_active) WHERE is_active = true;
 CREATE INDEX idx_fact_next_reprocess ON app.fact (next_reprocess) WHERE next_reprocess IS NOT NULL;
 CREATE INDEX idx_fact_embedding ON app.fact USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX idx_fact_folder_proposed_at ON app.fact (folder_proposed_at DESC) WHERE folder_proposed_at IS NOT NULL;
+CREATE INDEX idx_fact_folder_target ON app.fact (folder_target) WHERE folder_target IS NOT NULL;
 
 -- ============================================================================
 -- FACT_RELATIONSHIP — typed edges between factoids
@@ -388,6 +399,62 @@ CREATE TABLE app.triage_rule (
 CREATE INDEX idx_triage_rule_active ON app.triage_rule (priority) WHERE enabled = true AND confirmed = true;
 
 -- ============================================================================
+-- FOLDER_PROFILE — catalog entry per willow-secondary subfolder (foldersort)
+-- ============================================================================
+
+CREATE TABLE app.folder_profile (
+  name              text PRIMARY KEY,
+  mailbox_id        text,                                   -- JMAP id (refreshed on bootstrap)
+  parent_path       text DEFAULT 'willow-secondary',
+  description       text NOT NULL DEFAULT '',
+  llm_hint          text,
+  example_subjects  text[] NOT NULL DEFAULT '{}',
+  example_senders   text[] NOT NULL DEFAULT '{}',
+  enabled           boolean NOT NULL DEFAULT true,
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_folder_profile_enabled ON app.folder_profile (enabled);
+
+-- ============================================================================
+-- FOLDER_RULE — deterministic shortcut for foldersort
+-- ============================================================================
+
+CREATE TABLE app.folder_rule (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name            text NOT NULL,
+  field           text NOT NULL,
+  operator        text NOT NULL CHECK (operator IN ('equals','contains','starts_with','ends_with','regex','exists','gte')),
+  value           text,
+  header_name     text,
+  target_folder   text NOT NULL REFERENCES app.folder_profile(name) ON DELETE RESTRICT,
+  priority        integer NOT NULL DEFAULT 100,
+  enabled         boolean NOT NULL DEFAULT true,
+  confirmed       boolean NOT NULL DEFAULT false,
+  source          text NOT NULL CHECK (source IN ('system','user','agent')),
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_folder_rule_active ON app.folder_rule (priority) WHERE enabled = true AND confirmed = true;
+CREATE INDEX idx_folder_rule_target ON app.folder_rule (target_folder);
+
+-- ============================================================================
+-- CORRESPONDENT — addresses Vineel has emailed (people-i-don't-know signal)
+-- ============================================================================
+
+CREATE TABLE app.correspondent (
+  address       text PRIMARY KEY,
+  source        text NOT NULL CHECK (source IN ('scan','manual')),
+  note          text,
+  first_seen    timestamptz NOT NULL DEFAULT now(),
+  last_seen_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_correspondent_source ON app.correspondent (source);
+
+-- ============================================================================
 -- INTEREST — user-defined standing interests
 -- ============================================================================
 
@@ -483,3 +550,6 @@ ALTER TABLE app.fact ADD CONSTRAINT fk_fact_intent
 
 ALTER TABLE app.fact ADD CONSTRAINT fk_fact_triage_rule
   FOREIGN KEY (triage_rule_id) REFERENCES app.triage_rule(id);
+
+ALTER TABLE app.fact ADD CONSTRAINT fk_fact_folder_rule
+  FOREIGN KEY (folder_rule_id) REFERENCES app.folder_rule(id) ON DELETE SET NULL;

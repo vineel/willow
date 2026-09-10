@@ -13,6 +13,7 @@ export interface JMAPMailbox {
   id: string;
   name: string;
   role: string | null;
+  parentId: string | null;
 }
 
 export async function getSession(token: string): Promise<JMAPSession> {
@@ -46,7 +47,7 @@ export async function getMailboxes(
   const response = await jmapRequest(session.apiUrl, token, [
     [
       "Mailbox/get",
-      { accountId: session.accountId, properties: ["id", "name", "role"] },
+      { accountId: session.accountId, properties: ["id", "name", "role", "parentId"] },
       "m1",
     ],
   ]);
