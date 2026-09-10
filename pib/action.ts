@@ -293,6 +293,9 @@ function composePrompt(
   }
 
   parts.push("");
+  parts.push("NOTIFICATION SUBJECT REQUIREMENT:");
+  parts.push(`If you call send_notification for this interest, the subject MUST start with "Willow: Interest" so it routes to the willow-secondary/Interests folder. Use "Willow: Interest — <summary>" for genuine matches and "Willow: Interest FP — <reason>" if you determine this is a false positive.`);
+  parts.push("");
   parts.push("USER'S INSTRUCTION:");
   parts.push(interest.action_prompt!);
 
