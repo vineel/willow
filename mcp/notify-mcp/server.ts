@@ -13,6 +13,7 @@ import { z } from "zod";
 import { getSecret } from "../../pib/config";
 import { getSession, getMailboxes } from "../../pib/jmap/session";
 import { sendNotification, sendEmail } from "../../pib/jmap/notify";
+import { resolveBody } from "../../pib/jmap/body";
 import type { JMAPSession } from "../../pib/jmap/types";
 
 // Cache session + drafts ID across calls
@@ -33,31 +34,6 @@ async function ensureSession() {
   cachedDraftsId = drafts.id;
   cachedToken = token;
   return { session, draftsId: drafts.id, token };
-}
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<\/tr>/gi, "\n")
-    .replace(/<\/h[1-6]>/gi, "\n\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function isHtml(text: string): boolean {
-  return /<[a-z][\s\S]*>/i.test(text);
-}
-
-function resolveBody(bodyText: string, bodyHtml?: string): { bodyText: string; bodyHtml?: string } {
-  if (bodyHtml) return { bodyText, bodyHtml };
-  if (isHtml(bodyText)) return { bodyText: stripHtml(bodyText), bodyHtml: bodyText };
-  return { bodyText };
 }
 
 const server = new McpServer(

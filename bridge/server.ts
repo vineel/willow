@@ -7,6 +7,7 @@ import { chatRoutes } from "./routes/chat.js";
 import { conversationRoutes } from "./routes/conversation.js";
 import { todoRoutes } from "./routes/todos.js";
 import { gizmoRoutes } from "./routes/gizmo.js";
+import { mailRoutes } from "./routes/mail.js";
 import { mailLogRoutes } from "./routes/mail-log.js";
 
 const fastify = Fastify({ logger: true });
@@ -18,6 +19,7 @@ await fastify.register(chatRoutes, { pool });
 await fastify.register(conversationRoutes);
 await fastify.register(todoRoutes);
 await fastify.register(gizmoRoutes);
+await fastify.register(mailRoutes);
 await fastify.register(mailLogRoutes);
 
 await pool.start();
