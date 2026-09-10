@@ -81,27 +81,37 @@ function renderListPage(todos: TodoJson[]): string {
   li { position: relative; overflow: hidden; touch-action: pan-y;
     background: #fff; border-bottom: 1px solid #eee;
     transition: height .25s ease, opacity .2s ease; }
-  .row { position: relative; z-index: 1; background: #fff; padding: 14px 16px;
+  .row { position: relative; z-index: 1; background: #fff;
+    display: flex; align-items: stretch;
     transform: translateX(0); transition: transform .2s ease;
-    min-height: 56px; display: flex; flex-direction: column; gap: 4px; }
-  .row .title { font-size: 1em; line-height: 1.3; word-wrap: break-word; }
-  .row .meta { font-size: 0.8em; color: #666; display: flex; gap: 8px; flex-wrap: wrap; }
+    min-height: 56px; }
+  .content { flex: 1; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .content .title { font-size: 1em; line-height: 1.3; word-wrap: break-word; }
+  .content .meta { font-size: 0.8em; color: #666; display: flex; gap: 8px; flex-wrap: wrap; }
   .badge { display: inline-block; padding: 1px 6px; border-radius: 3px;
     font-size: 0.75em; font-weight: 500; }
   .badge.urgent { background: #fee; color: #b00; }
   .badge.high { background: #fef3c7; color: #92400e; }
   .badge.overdue { background: #fee; color: #b00; }
   .badge.due { background: #f3f4f6; color: #555; }
-  .actions { position: absolute; top: 0; right: 0; height: 100%; width: 280px;
+  .done-btn { flex: 0 0 70px; width: 70px; border: none; padding: 0; margin: 0;
+    font-size: 0.9em; font-weight: 500; color: #fff;
+    min-height: 56px; cursor: pointer; background: #16a34a; }
+  .actions { position: absolute; top: 0; right: 0; height: 100%; width: 210px;
     display: flex; align-items: stretch; }
   .actions button { width: 70px; border: none; padding: 0; margin: 0;
     font-size: 0.9em; font-weight: 500; color: #fff;
     min-height: 56px; cursor: pointer; }
-  .act-done { background: #16a34a; }
   .act-top  { background: #2563eb; }
   .act-bot  { background: #6b7280; }
   .act-edit { background: #374151; }
   .empty { padding: 48px 16px; text-align: center; color: #999; }
+  @media (min-width: 640px) {
+    li { display: flex; align-items: stretch; overflow: visible; touch-action: auto; }
+    .row { flex: 1; transform: none !important; }
+    .actions { position: static; width: auto; height: auto; }
+  }
 </style>
 </head>
 <body>
@@ -128,24 +138,28 @@ function renderListItem(t: TodoJson): string {
   if (t.dueDate) badges.push(`<span class="badge due">due ${escapeHtml(t.dueDate)}</span>`);
   const meta = badges.length > 0 ? `<div class="meta">${badges.join(" ")}</div>` : "";
   return `<li data-id="${escapeHtml(t.id)}">
+    <div class="row">
+      <div class="content">
+        <div class="title">${escapeHtml(t.title)}</div>
+        ${meta}
+      </div>
+      <button class="done-btn" data-act="done">Done</button>
+    </div>
     <div class="actions">
-      <button class="act-done" data-act="done">Done</button>
       <button class="act-top"  data-act="top">Top</button>
       <button class="act-bot"  data-act="bottom">Bot</button>
       <button class="act-edit" data-act="edit">Edit</button>
-    </div>
-    <div class="row">
-      <div class="title">${escapeHtml(t.title)}</div>
-      ${meta}
     </div>
   </li>`;
 }
 
 function listScript(): string {
   return `
-const ACTION_WIDTH = 280;
+const ACTION_WIDTH = 210;
 const SWIPE_THRESHOLD = 0.75;
-const SNAP_THRESHOLD = 100;
+const SNAP_THRESHOLD = 80;
+const WIDE_MQ = window.matchMedia('(min-width: 640px)');
+function isWide() { return WIDE_MQ.matches; }
 let openLi = null;
 
 function getRow(li) { return li.querySelector('.row'); }
@@ -179,7 +193,7 @@ function removeLi(li) {
 
 async function doDone(li) {
   const row = getRow(li);
-  setX(row, -row.offsetWidth);
+  if (!isWide()) setX(row, -row.offsetWidth);
   try {
     await fetch('/api/todos/' + li.dataset.id + '/done', { method: 'POST' });
   } catch (e) { console.error(e); }
@@ -207,13 +221,15 @@ function rerender(todos) {
     if (t.dueDate) badges.push('<span class="badge due">due ' + escapeText(t.dueDate) + '</span>');
     const meta = badges.length ? '<div class="meta">' + badges.join(' ') + '</div>' : '';
     return '<li data-id="' + escapeAttr(t.id) + '">'
+      + '<div class="row">'
+      + '<div class="content"><div class="title">' + escapeText(t.title) + '</div>' + meta + '</div>'
+      + '<button class="done-btn" data-act="done">Done</button>'
+      + '</div>'
       + '<div class="actions">'
-      + '<button class="act-done" data-act="done">Done</button>'
       + '<button class="act-top"  data-act="top">Top</button>'
       + '<button class="act-bot"  data-act="bottom">Bot</button>'
       + '<button class="act-edit" data-act="edit">Edit</button>'
       + '</div>'
-      + '<div class="row"><div class="title">' + escapeText(t.title) + '</div>' + meta + '</div>'
       + '</li>';
   }).join('');
   openLi = null;
@@ -230,9 +246,10 @@ function escapeAttr(s) {
 let drag = null;
 
 document.addEventListener('pointerdown', (e) => {
+  if (isWide()) return;
   const li = e.target.closest('li[data-id]');
   if (!li) return;
-  if (e.target.closest('.actions')) return;
+  if (e.target.closest('button')) return;
   drag = {
     li,
     row: getRow(li),
