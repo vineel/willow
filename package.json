@@ -1,6 +1,6 @@
 {
   "name": "willow",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "type": "module",
   "scripts": {
     "dev": "bun run --watch bridge/server.ts",
@@ -60,6 +60,7 @@
     "foldersort:bootstrap": "bun run pib/scripts/foldersort-bootstrap.ts",
     "foldersort:dry-run": "bun run pib/scripts/foldersort-dry-run.ts",
     "foldersort:backfill": "bun run pib/scripts/foldersort-backfill.ts",
+    "foldersort:sweep": "bun run pib/scripts/foldersort-sweep.ts",
     "foldersort:preview": "bun run pib/scripts/foldersort-preview.ts",
     "foldersort:migrate": "psql -d willow -f db/migrations/012-foldersort.sql"
   },

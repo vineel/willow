@@ -114,6 +114,18 @@ Then talk to it naturally:
 | `bun run pib:digest:test -- <id> ...` | Send a test digest for specific fact IDs |
 | `bun run pib:migrate` | Run the PIB database migration |
 
+### Foldersort
+
+Sorts inbox email into `willow-secondary/*` subfolders (see [Fastmail folders](#fastmail-folders)) via deterministic rules first, then an LLM decision against each folder's profile description. Profiles/rules live in `app.folder_profile` / `app.folder_rule`, managed via the `willow-foldersort` MCP server or the scripts below.
+
+| Command | Description |
+|---|---|
+| `bun run foldersort:bootstrap` | Discover `willow-secondary` subfolders in Fastmail, upsert `app.folder_profile` rows (caching `mailbox_id`), and seed descriptions/rules from `pib/foldersort/seed-taxonomy.ts`. Idempotent — run after creating a new Fastmail subfolder or editing the seed taxonomy. |
+| `bun run foldersort:backfill -- --days 7` | Re-run decide+apply over recent **inbox** emails and move them into subfolders. |
+| `bun run foldersort:preview` | Show pending foldersort proposals. |
+| `bun run foldersort:dry-run` | Preview decisions without moving anything. |
+| `bun run foldersort:sweep -- --source uninteresting --only bills-receipts` | Re-decide emails already filed in one subfolder and move any that now belong in a different one (subfolder → subfolder; never moves mail back to the inbox). Omit `--only` to allow any target; add `--days N` to limit the window; add `--dry-run` to preview counts only. |
+
 ### Portfolio
 
 | Command | Description |
@@ -160,6 +172,7 @@ These run as stdio processes, started automatically by Claude Code via `.mcp.jso
 | `willow-pipeline` | `pipeline_status`, `run_now`, `digest_preview`, `send_digest` |
 | `willow-todo` | `add_todo`, `list_todos`, `complete_todo`, `update_todo` |
 | `willow-calendar` | `get_calendars`, `list_events`, `search_events`, `create_event`, `update_event`, `delete_event`, `find_conflicts` |
+| `willow-foldersort` | `list_profiles`, `create_profile`, `update_profile`, `disable_profile`, `list_folder_rules`, `add_folder_rule`, `add_folder_rule_from_url`, `disable_folder_rule`, `preview_inbox_sort`, `test_foldersort`, `correct_placement`, `add_correspondent`, `remove_correspondent`, `list_correspondents` — not currently in this session's `.mcp.json`; see `foldersort:*` commands above for the CLI equivalents |
 | `willow-session` | `restart_session` — clears Claude Code conversation context and reloads MCP server code by respawning the `willow-agent` tmux pane |
 
 ## LaunchAgents (auto-start & auto-restart)
@@ -232,6 +245,7 @@ Fastmail inbox
 | `willow` | Willow's notifications to you. Never ingested. |
 | `for-willow` | Drop an email here to process it and permanently allowlist the sender. |
 | `not-for-willow` | Drop an email here to permanently blocklist the sender. |
+| `willow-secondary/*` | Foldersort destinations (`uninteresting`, `bills-receipts`, `marketing-interesting`, etc.) — see [Foldersort](#foldersort). |
 
 ## Mail sort log
 
