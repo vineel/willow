@@ -104,7 +104,7 @@ Example: {"category": "subscription", "subcategory": "newsletter", "confidence":
         { role: "system", content: "You are an email classifier. Respond with JSON only." },
         { role: "user", content: prompt },
       ],
-      { jsonSchema: schema, temperature: 0.1, timeoutMs: 30_000 }
+      { jsonSchema: schema, temperature: 0.1, timeoutMs: 90_000 }
     );
 
     const result = parsed as { category: string; subcategory: string; confidence: number };

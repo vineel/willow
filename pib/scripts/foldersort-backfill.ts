@@ -18,6 +18,7 @@
  *   bun run foldersort:backfill -- --days 7
  *   bun run foldersort:backfill -- --since 2026-05-16    # since midnight ET that day
  *   bun run foldersort:backfill -- --since 2026-05-16 --reprocess
+ *   bun run foldersort:backfill -- --days 30 --terse    # batch-size window: skip the thorough prompt (see foldersort:sweep)
  *   WILLOW_FOLDERSORT_APPLY=0 bun run foldersort:backfill -- --days 1
  */
 
@@ -44,13 +45,14 @@ function parseArgs() {
     throw new Error(`--since must be YYYY-MM-DD (got "${since}")`);
   }
   const reprocess = argv.includes("--reprocess");
-  return { days, since, reprocess };
+  const terse = argv.includes("--terse");
+  return { days, since, reprocess, terse };
 }
 
-const { days, since, reprocess } = parseArgs();
+const { days, since, reprocess, terse } = parseArgs();
 const autoApply = shouldAutoApply();
 const windowDesc = since ? `since midnight ET ${since}` : `last ${days} day(s)`;
-log.runStart(`backfill ${windowDesc} reprocess=${reprocess} auto_apply=${autoApply}`);
+log.runStart(`backfill ${windowDesc} reprocess=${reprocess} auto_apply=${autoApply} terse=${terse}`);
 
 // Resolve inbox mailbox id so we can filter source_notes by mailboxIds metadata.
 const token = await getSecret("fastmail-token");
@@ -103,7 +105,7 @@ for (const row of rows) {
   const event = sourceNoteToEvent(row);
   let decision: FolderDecision;
   try {
-    decision = await decide(event, { profiles, rules });
+    decision = await decide(event, { profiles, rules, terseOnly: terse });
   } catch (err) {
     decideErrors++;
     log.error(`fact ${row.fact_id} decide failed: ${(err as Error).message}`);

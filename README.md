@@ -121,10 +121,12 @@ Sorts inbox email into `willow-secondary/*` subfolders (see [Fastmail folders](#
 | Command | Description |
 |---|---|
 | `bun run foldersort:bootstrap` | Discover `willow-secondary` subfolders in Fastmail, upsert `app.folder_profile` rows (caching `mailbox_id`), and seed descriptions/rules from `pib/foldersort/seed-taxonomy.ts`. Idempotent — run after creating a new Fastmail subfolder or editing the seed taxonomy. |
-| `bun run foldersort:backfill -- --days 7` | Re-run decide+apply over recent **inbox** emails and move them into subfolders. |
+| `bun run foldersort:backfill -- --days 7` | Re-run decide+apply over recent **inbox** emails and move them into subfolders. Add `--reprocess` to redo already-applied ones (e.g. after editing rules), `--terse` for batch runs (see below). |
 | `bun run foldersort:preview` | Show pending foldersort proposals. |
 | `bun run foldersort:dry-run` | Preview decisions without moving anything. |
 | `bun run foldersort:sweep -- --source uninteresting --only bills-receipts` | Re-decide emails already filed in one subfolder and move any that now belong in a different one (subfolder → subfolder; never moves mail back to the inbox). Omit `--only` to allow any target; add `--days N` to limit the window; add `--dry-run` to preview counts only. |
+
+Both `foldersort:backfill` and `foldersort:sweep` accept `--terse`: skips the normal thorough LLM prompt and goes straight to a short, no-per-folder-enumeration one. For a single live email the thorough prompt is worth the wait and usually finishes well within its timeout; across a large batch it reliably burns the full timeout before falling back anyway, so batch runs should just start terse. `foldersort:sweep` also accepts `--rules-only` to skip the LLM entirely (fastest, but only catches senders/subjects with an explicit rule).
 
 ### Portfolio
 

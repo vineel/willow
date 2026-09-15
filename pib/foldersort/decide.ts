@@ -14,6 +14,8 @@ export interface DecideContext {
   // Pre-loaded for batch callers; the orchestrator loads them itself if absent.
   profiles?: FolderProfile[];
   rules?: FolderRule[];
+  // Batch/sweep mode: see LLMOptions.terseOnly.
+  terseOnly?: boolean;
 }
 
 export async function decide(
@@ -36,7 +38,7 @@ export async function decide(
 
   // 2) LLM judgment. Pre-compute the correspondent signal for the prompt.
   const known = await isKnownCorrespondent(event.fromEntity.address);
-  const llm = await decideViaLLM(event, profiles, { isKnownCorrespondent: known });
+  const llm = await decideViaLLM(event, profiles, { isKnownCorrespondent: known, terseOnly: ctx.terseOnly });
 
   if (llm) {
     return {

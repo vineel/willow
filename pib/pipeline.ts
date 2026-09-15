@@ -4,6 +4,7 @@
  */
 
 import { getSecret, sql, pibConfig } from "./config";
+import { ensureModelLoaded } from "../memory/lmstudio/client";
 import { getSession, getMailboxes, findMailbox } from "./jmap/session";
 import {
   queryEmails,
@@ -123,6 +124,14 @@ export async function runPipeline(
   stats.fetched = emails.length;
   log.info(`Fetched ${emails.length} emails from ${folder}`);
   const events = emails.map(normalize);
+
+  // Warm the local model before any classify/foldersort calls. Pays the
+  // cold-start tax (LM Studio's JIT reload after its TTL-driven unload can
+  // take several seconds) here, outside classify()/decideViaLLM()'s own
+  // tighter per-call timeouts, instead of eating into their budget.
+  if (doClassify && events.length > 0) {
+    await ensureModelLoaded();
+  }
 
   // Load rules and interests once for the batch
   const rules = await loadRules();

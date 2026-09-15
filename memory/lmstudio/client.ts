@@ -17,6 +17,7 @@ interface ChatCompletionOptions {
   maxRetries?: number;
   timeoutMs?: number;
   jsonSchema?: JsonSchema;
+  maxTokens?: number;
 }
 
 interface ChatCompletionResponse {
@@ -41,16 +42,29 @@ export async function chatCompletion(
     maxRetries = 1,
     timeoutMs = DEFAULT_TIMEOUT_MS,
     jsonSchema,
+    maxTokens,
   } = options;
 
   let lastError: Error | null = null;
   const allMessages = [...messages];
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    // Bound the whole request-plus-body-read via Promise.race, not just the
+    // initial fetch() via AbortSignal — a connection can hang mid-body-read
+    // (past the point an abort reliably interrupts it) and leave the
+    // process stuck forever with no error. The AbortController is still
+    // wired up as a best-effort way to also stop the underlying fetch so it
+    // doesn't linger; the race is what guarantees the caller isn't stuck.
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let timer: ReturnType<typeof setTimeout>;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        controller.abort();
+        reject(Object.assign(new Error(`LM Studio chat timed out after ${timeoutMs}ms`), { name: "AbortError" }));
+      }, timeoutMs);
+    });
 
-    try {
+    const doAttempt = async () => {
       const res = await fetch(`${config.lmstudio.baseUrl}/chat/completions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,6 +73,7 @@ export async function chatCompletion(
           model,
           messages: allMessages,
           temperature,
+          ...(maxTokens ? { max_tokens: maxTokens } : {}),
           response_format: jsonSchema
             ? { type: "json_schema", json_schema: jsonSchema }
             : { type: "text" },
@@ -76,11 +91,15 @@ export async function chatCompletion(
       const cleaned = stripMarkdownFences(content);
       const parsed = JSON.parse(cleaned);
       return { parsed, usage: data.usage };
+    };
+
+    try {
+      return await Promise.race([doAttempt(), timeout]);
     } catch (err) {
       lastError = err as Error;
 
       if (lastError.name === "AbortError") {
-        throw new Error(`LM Studio chat timed out after ${timeoutMs}ms`);
+        throw lastError;
       }
 
       // On JSON parse failure, retry with a corrective message
@@ -95,7 +114,7 @@ export async function chatCompletion(
 
       throw lastError;
     } finally {
-      clearTimeout(timer);
+      clearTimeout(timer!);
     }
   }
 

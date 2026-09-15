@@ -16,11 +16,18 @@
  *   bun run foldersort:sweep -- --source uninteresting --only bills-receipts
  *   bun run foldersort:sweep -- --source uninteresting --only bills-receipts --dry-run
  *   bun run foldersort:sweep -- --source uninteresting --only bills-receipts --rules-only
+ *   bun run foldersort:sweep -- --source uninteresting --only bills-receipts --terse
  *
  * --rules-only skips the LLM entirely and matches deterministic folder_rule
- * rows only. Use it for large folders (thousands of emails) where per-email
- * LLM calls would be too slow or where the local LLM service is unreliable —
- * the tradeoff is it only catches senders/subjects you've written a rule for.
+ * rows only. Fastest, but only catches senders/subjects you've written a
+ * rule for.
+ *
+ * --terse still uses the LLM for anything rules don't catch, but skips the
+ * normal thorough prompt and goes straight to the short, no-enumeration one
+ * (see TERSE_SYSTEM_PROMPT in foldersort/llm.ts) — for one live email the
+ * thorough prompt is worth the wait and usually succeeds, but across a
+ * thousand-email backlog it reliably burns its full timeout before falling
+ * back anyway, so batch runs should just start terse.
  */
 
 import { sql } from "../config";
@@ -48,13 +55,15 @@ function parseArgs() {
   const only = oi !== -1 ? argv[oi + 1] : undefined;
   const dryRun = argv.includes("--dry-run");
   const rulesOnly = argv.includes("--rules-only");
+  const terse = argv.includes("--terse");
   const shi = argv.indexOf("--show");
   const show = shi !== -1 ? parseInt(argv[shi + 1] ?? "10", 10) : 0;
-  return { source, days, only, dryRun, rulesOnly, show };
+  if (rulesOnly && terse) throw new Error("--rules-only and --terse are mutually exclusive");
+  return { source, days, only, dryRun, rulesOnly, terse, show };
 }
 
-const { source, days, only, dryRun, rulesOnly, show } = parseArgs();
-log.runStart(`sweep source="${source}" days=${days} only=${only ?? "(any)"} dry_run=${dryRun} rules_only=${rulesOnly}`);
+const { source, days, only, dryRun, rulesOnly, terse, show } = parseArgs();
+log.runStart(`sweep source="${source}" days=${days} only=${only ?? "(any)"} dry_run=${dryRun} rules_only=${rulesOnly} terse=${terse}`);
 
 const token = await getSecret("fastmail-token");
 const session = await getSession(token);
@@ -105,7 +114,7 @@ for (const row of rows) {
       : { target: LEAVE_IN_INBOX, decided_by: "default", rule_id: null, reason: "no rule match (rules-only sweep)" };
   } else {
     try {
-      decision = await decide(event, { profiles, rules });
+      decision = await decide(event, { profiles, rules, terseOnly: terse });
     } catch (err) {
       errors++;
       log.error(`fact ${row.fact_id} decide failed: ${(err as Error).message}`);
